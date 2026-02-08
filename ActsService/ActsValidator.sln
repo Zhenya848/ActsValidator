@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActsValidator.API", "src\ActsValidator.API\ActsValidator.API.csproj", "{90369C01-E34B-42C5-BA74-F1F6032AC98D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActsValidator.Domain", "src\ActsValidator.Domain\ActsValidator.Domain.csproj", "{5C7A9BEF-5AA4-407C-B688-1E0DF2F4499E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActsValidator.Application", "src\ActsValidator.Application\ActsValidator.Application.csproj", "{DC92929C-3291-4593-AE82-51034630F90C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActsValidator.Infrastructure", "src\ActsValidator.Infrastructure\ActsValidator.Infrastructure.csproj", "{2922B2ED-D9BE-4C92-B524-7A0354A03091}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActsValidator.Presentation", "src\ActsValidator.Presentation\ActsValidator.Presentation.csproj", "{69919A6F-8004-4F15-AC28-26ED9D7E8381}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{90369C01-E34B-42C5-BA74-F1F6032AC98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90369C01-E34B-42C5-BA74-F1F6032AC98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90369C01-E34B-42C5-BA74-F1F6032AC98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90369C01-E34B-42C5-BA74-F1F6032AC98D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C7A9BEF-5AA4-407C-B688-1E0DF2F4499E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C7A9BEF-5AA4-407C-B688-1E0DF2F4499E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C7A9BEF-5AA4-407C-B688-1E0DF2F4499E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C7A9BEF-5AA4-407C-B688-1E0DF2F4499E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC92929C-3291-4593-AE82-51034630F90C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC92929C-3291-4593-AE82-51034630F90C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC92929C-3291-4593-AE82-51034630F90C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC92929C-3291-4593-AE82-51034630F90C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2922B2ED-D9BE-4C92-B524-7A0354A03091}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2922B2ED-D9BE-4C92-B524-7A0354A03091}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2922B2ED-D9BE-4C92-B524-7A0354A03091}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2922B2ED-D9BE-4C92-B524-7A0354A03091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69919A6F-8004-4F15-AC28-26ED9D7E8381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69919A6F-8004-4F15-AC28-26ED9D7E8381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69919A6F-8004-4F15-AC28-26ED9D7E8381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69919A6F-8004-4F15-AC28-26ED9D7E8381}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

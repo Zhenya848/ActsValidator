@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>b25ba98f-be60-4a67-b3e5-8c2d23e96d9f</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ActsValidator.Application\ActsValidator.Application.csproj" />
+      <ProjectReference Include="..\ActsValidator.Domain\ActsValidator.Domain.csproj" />
+      <ProjectReference Include="..\ActsValidator.Infrastructure\ActsValidator.Infrastructure.csproj" />
+      <ProjectReference Include="..\ActsValidator.Presentation\ActsValidator.Presentation.csproj" />
+    </ItemGroup>
+
+</Project>
