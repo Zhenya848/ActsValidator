@@ -9,6 +9,8 @@ namespace UserService.Infrastructure.DbContexts;
 
 public class AuthDbContext(IConfiguration configuration) : IdentityDbContext<User, Role, Guid>
 {
+    public DbSet<RefreshSession> RefreshSessions => Set<RefreshSession>();
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));

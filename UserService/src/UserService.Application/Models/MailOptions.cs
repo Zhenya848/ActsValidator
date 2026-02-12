@@ -1,4 +1,4 @@
-namespace UserService.Domain.Shared.ValueObjects.EmailSender;
+namespace UserService.Application.Models;
 
 public record MailOptions
 {

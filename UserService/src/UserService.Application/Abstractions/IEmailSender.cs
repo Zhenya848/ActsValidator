@@ -1,8 +1,8 @@
 using CSharpFunctionalExtensions;
+using UserService.Application.Models;
 using UserService.Domain.Shared;
-using UserService.Domain.Shared.ValueObjects.EmailSender;
 
-namespace UserService.Application.EmailSender;
+namespace UserService.Application.Abstractions;
 
 public interface IEmailSender
 {

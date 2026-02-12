@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using UserService.Application.Commands.LoginUser;
+using UserService.Application.Commands.RefreshToken;
 using UserService.Application.Commands.RegisterUser;
 using UserService.Application.Commands.VerifyEmail;
+using UserService.Domain.Shared;
 using UserService.Presentation.Extensions;
 using UserService.Presentation.Requests;
 
@@ -10,7 +13,7 @@ namespace UserService.Presentation;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("registration")]
     public async Task<IActionResult> Handle(
         [FromBody] RegisterUserRequest request,
         [FromServices] RegisterUserHandler handler,
@@ -34,6 +37,38 @@ public class AuthController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var command = new VerifyEmailCommand(userId, token);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginUserRequest request,
+        [FromServices] LoginUserHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new LoginUserCommand(request.Email, request.Password);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(result.Value));
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(
+        [FromBody] RefreshTokenRequest request,
+        [FromServices] RefreshTokenHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new RefreshTokenCommand(request.AccessToken, request.RefreshToken);
         
         var result = await handler.Handle(command, cancellationToken);
         
