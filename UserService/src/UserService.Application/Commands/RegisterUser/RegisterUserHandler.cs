@@ -2,10 +2,9 @@ using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Abstractions;
-using UserService.Application.EmailSender;
+using UserService.Application.Models;
 using UserService.Domain;
 using UserService.Domain.Shared;
-using UserService.Domain.Shared.ValueObjects.EmailSender;
 
 namespace UserService.Application.Commands.RegisterUser;
 
@@ -13,7 +12,6 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
 {
     private readonly UserManager<User> _userManager;
     private readonly IEmailSender _emailSender;
-
     public RegisterUserHandler(UserManager<User> userManager, IEmailSender emailSender)
     {
         _userManager = userManager;
@@ -36,8 +34,19 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
         var user = new User
         {
             Email = command.Email,
-            UserName = command.UserName
+            UserName = command.Email,
+            DisplayName = command.UserName
         };
+
+        var userExist = await _userManager.FindByEmailAsync(command.Email);
+
+        if (userExist is not null)
+        {
+            if (userExist.EmailConfirmed == false)
+                await _userManager.DeleteAsync(userExist);
+            else
+                return (ErrorList)Errors.User.AlreadyExist();
+        }
         
         var result = await _userManager.CreateAsync(user, command.Password);
 

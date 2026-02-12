@@ -4,5 +4,5 @@ namespace UserService.Domain;
 
 public class User : IdentityUser<Guid>
 {
-    
+    public string DisplayName { get; init; }
 }

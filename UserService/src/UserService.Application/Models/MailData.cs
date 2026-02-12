@@ -1,3 +1,3 @@
-namespace UserService.Domain.Shared.ValueObjects.EmailSender;
+namespace UserService.Application.Models;
 
 public record MailData(string To, string Subject, string Body);

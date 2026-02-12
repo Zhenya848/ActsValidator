@@ -1,9 +1,9 @@
 using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using UserService.Application.EmailSender;
+using UserService.Application.Abstractions;
+using UserService.Application.Models;
 using UserService.Domain.Shared;
-using UserService.Domain.Shared.ValueObjects.EmailSender;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace UserService.Infrastructure;

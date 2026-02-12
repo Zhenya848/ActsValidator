@@ -25,8 +25,8 @@ public class Errors
         public static Error NotFound() => 
             Error.NotFound("user.notfound", "user not found");
         
-        public static Error NotFound(string username) => 
-            Error.NotFound("user.notfound", $"user with name {username} not found");
+        public static Error NotFound(string email) => 
+            Error.NotFound("user.notfound", $"user with email {email} not found");
             
         public static Error WrongCredentials() =>
             Error.Validation("user.wrong.credentials", "user with wrong credentials");
