@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using LoginUserResponse = UserService.Application.Models.LoginUserResponse;
 
 namespace UserService.Application.Commands.LoginUser;
 
@@ -24,7 +25,7 @@ public class LoginUserHandler : ICommandHandler<LoginUserCommand, Result<LoginUs
         var user = await _userService.FindByEmailAsync(command.Email);
 
         if (user is null)
-            return (ErrorList)Errors.User.NotFound(command.Email);
+            return (ErrorList)Errors.User.WrongCredentials();
         
         var isPasswordCorrect = await _userService.CheckPasswordAsync(user, command.Password);
         

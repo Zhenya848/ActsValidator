@@ -14,7 +14,7 @@ namespace UserService.Presentation;
 public class AuthController : ControllerBase
 {
     [HttpPost("registration")]
-    public async Task<IActionResult> Handle(
+    public async Task<IActionResult> Register(
         [FromBody] RegisterUserRequest request,
         [FromServices] RegisterUserHandler handler,
         CancellationToken cancellationToken = default)
@@ -58,6 +58,8 @@ public class AuthController : ControllerBase
         
         if (result.IsFailure)
             return result.Error.ToResponse();
+        
+        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
         
         return Ok(Envelope.Ok(result.Value));
     }

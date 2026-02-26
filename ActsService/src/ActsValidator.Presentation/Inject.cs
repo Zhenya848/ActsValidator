@@ -1,3 +1,4 @@
+using ActsValidator.Presentation.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,10 @@ public static class Inject
         this IServiceCollection services,
         IConfiguration config)
     {
+        services.Configure<AuthOptions>(config.GetSection(AuthOptions.Auth));
+        
+        services.AddOptions<AuthOptions>();
+        
         return services;
     }
 }

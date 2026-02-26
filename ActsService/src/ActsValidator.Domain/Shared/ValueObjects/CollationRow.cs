@@ -14,7 +14,7 @@ public record CollationRow : IEquatable<CollationRow>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Debet, Credit, Date);
+        return HashCode.Combine(Date, Debet, Credit);
     }
 
     private CollationRow(int serialNumber, DateTime date, decimal debet, decimal credit)

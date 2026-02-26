@@ -5,9 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ActsValidator.Infrastructure.DbContexts;
 
-public class AppDbContext(IConfiguration configuration)  : DbContext
+public class AppDbContext(IConfiguration configuration) : DbContext
 {
     public DbSet<Collation> Collations => Set<Collation>();
+    
+    public DbSet<AiRequest> AiRequests => Set<AiRequest>();
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

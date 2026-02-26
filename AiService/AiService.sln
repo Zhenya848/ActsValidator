@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiService", "src\AiService\AiService.csproj", "{C1B3B0FE-02DD-410C-A40F-8C4C9029355F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiMessaging.Contracts", "src\AiMessaging.Contracts\AiMessaging.Contracts.csproj", "{F74F6D8A-4667-4ED5-8B99-128ADA98355C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1B3B0FE-02DD-410C-A40F-8C4C9029355F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1B3B0FE-02DD-410C-A40F-8C4C9029355F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1B3B0FE-02DD-410C-A40F-8C4C9029355F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1B3B0FE-02DD-410C-A40F-8C4C9029355F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F74F6D8A-4667-4ED5-8B99-128ADA98355C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F74F6D8A-4667-4ED5-8B99-128ADA98355C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F74F6D8A-4667-4ED5-8B99-128ADA98355C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F74F6D8A-4667-4ED5-8B99-128ADA98355C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

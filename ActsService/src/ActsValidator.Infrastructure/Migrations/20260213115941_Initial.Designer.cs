@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ActsValidator.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260207170731_Initial")]
+    [Migration("20260213115941_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -108,6 +108,102 @@ namespace ActsValidator.Infrastructure.Migrations
                                 .HasConstraintName("fk_collations_collations_collation_id");
                         });
 
+                    b.OwnsMany("ActsValidator.Domain.ValueObjects.Discrepancy", "AiDiscrepancies", b1 =>
+                        {
+                            b1.Property<Guid>("CollationId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("CellName")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("CollationId", "__synthesizedOrdinal");
+
+                            b1.ToTable("collations");
+
+                            b1
+                                .ToJson("ai_discrepancies")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CollationId")
+                                .HasConstraintName("fk_collations_collations_collation_id");
+
+                            b1.OwnsOne("ActsValidator.Domain.Shared.ValueObjects.CollationRow", "Act1", b2 =>
+                                {
+                                    b2.Property<Guid>("DiscrepancyCollationId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<int>("Discrepancy__synthesizedOrdinal")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<decimal>("Credit")
+                                        .HasColumnType("numeric");
+
+                                    b2.Property<DateTime>("Date")
+                                        .HasColumnType("timestamp with time zone");
+
+                                    b2.Property<decimal>("Debet")
+                                        .HasColumnType("numeric");
+
+                                    b2.Property<int>("SerialNumber")
+                                        .HasColumnType("integer");
+
+                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal");
+
+                                    b2.ToTable("collations");
+
+                                    b2
+                                        .ToJson("ai_discrepancies")
+                                        .HasColumnType("jsonb");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal")
+                                        .HasConstraintName("fk_collations_collations_discrepancy_collation_id_discrepancy__s");
+                                });
+
+                            b1.OwnsOne("ActsValidator.Domain.Shared.ValueObjects.CollationRow", "Act2", b2 =>
+                                {
+                                    b2.Property<Guid>("DiscrepancyCollationId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<int>("Discrepancy__synthesizedOrdinal")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<decimal>("Credit")
+                                        .HasColumnType("numeric");
+
+                                    b2.Property<DateTime>("Date")
+                                        .HasColumnType("timestamp with time zone");
+
+                                    b2.Property<decimal>("Debet")
+                                        .HasColumnType("numeric");
+
+                                    b2.Property<int>("SerialNumber")
+                                        .HasColumnType("integer");
+
+                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal");
+
+                                    b2.ToTable("collations");
+
+                                    b2
+                                        .ToJson("ai_discrepancies")
+                                        .HasColumnType("jsonb");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal")
+                                        .HasConstraintName("fk_collations_collations_discrepancy_collation_id_discrepancy__s");
+                                });
+
+                            b1.Navigation("Act1");
+
+                            b1.Navigation("Act2");
+                        });
+
                     b.OwnsMany("ActsValidator.Domain.ValueObjects.Discrepancy", "Discrepancies", b1 =>
                         {
                             b1.Property<Guid>("CollationId")
@@ -153,7 +249,8 @@ namespace ActsValidator.Infrastructure.Migrations
                                     b2.Property<int>("SerialNumber")
                                         .HasColumnType("integer");
 
-                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal");
+                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal")
+                                        .HasName("pk_collations");
 
                                     b2.ToTable("collations");
 
@@ -186,7 +283,8 @@ namespace ActsValidator.Infrastructure.Migrations
                                     b2.Property<int>("SerialNumber")
                                         .HasColumnType("integer");
 
-                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal");
+                                    b2.HasKey("DiscrepancyCollationId", "Discrepancy__synthesizedOrdinal")
+                                        .HasName("pk_collations");
 
                                     b2.ToTable("collations");
 
@@ -207,6 +305,8 @@ namespace ActsValidator.Infrastructure.Migrations
                     b.Navigation("Act1");
 
                     b.Navigation("Act2");
+
+                    b.Navigation("AiDiscrepancies");
 
                     b.Navigation("Discrepancies");
                 });
