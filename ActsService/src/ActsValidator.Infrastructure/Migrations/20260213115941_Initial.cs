@@ -18,6 +18,7 @@ namespace ActsValidator.Infrastructure.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     act1 = table.Column<string>(type: "jsonb", nullable: true),
                     act2 = table.Column<string>(type: "jsonb", nullable: true),
+                    ai_discrepancies = table.Column<string>(type: "jsonb", nullable: true),
                     discrepancies = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>

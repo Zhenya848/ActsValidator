@@ -35,9 +35,8 @@ public static class Inject
             options.User.AllowedUserNameCharacters = UserConstants.AllowedUsernameCharacters;
             options.User.RequireUniqueEmail = true;
             
-            options.Password.RequiredLength = 4;
+            options.Password.RequiredLength = 8;
             options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = false;
         })
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();

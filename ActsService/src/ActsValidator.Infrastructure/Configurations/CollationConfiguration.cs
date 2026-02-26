@@ -1,5 +1,7 @@
+using System.Text.Json;
 using ActsValidator.Domain;
 using ActsValidator.Domain.Shared.ValueObjects.Ids;
+using ActsValidator.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,15 +16,16 @@ public class CollationConfiguration : IEntityTypeConfiguration<Collation>
         builder.Property(i => i.Id)
             .HasConversion(i => i.Value, value => CollationId.Create(value));
 
-        builder.OwnsMany(x => x.Act1, a => a.ToJson());
-        builder.OwnsMany(x => x.Act2, a => a.ToJson());
+        builder.HasOne(a => a.AiRequest).WithOne()
+            .HasForeignKey<AiRequest>(ci => ci.CollationId);
+
+        builder.Property(n => n.Act1Name).IsRequired();
+        builder.Property(n => n.Act2Name).IsRequired();
         
-        builder.OwnsMany(x => x.Discrepancies, d =>
-        {
-            d.ToJson();
-            
-            d.OwnsOne(x => x.Act1);
-            d.OwnsOne(x => x.Act2);
-        });
+        builder.Property(d => d.Discrepancies).HasConversion(
+                value => JsonSerializer.Serialize(value, JsonSerializerOptions.Default),
+                json => JsonSerializer.Deserialize<List<Discrepancy>>(json, JsonSerializerOptions.Default)!)
+            .HasColumnType("jsonb")
+            .IsRequired(false);
     }
 }

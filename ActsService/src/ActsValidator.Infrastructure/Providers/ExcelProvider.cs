@@ -33,57 +33,57 @@ public class ExcelProvider : IFileProvider
         return results.ToDictionary(x => x.Name, x => x.Cell!.Address.ColumnNumber);
     }
 
-    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file, bool isSecondFile = false)
+    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file)
     {
-        using var excelWorkbook = new XLWorkbook(file);
-        var worksheet = excelWorkbook.Worksheet(1);
+        try
+        {
+            using var excelWorkbook = new XLWorkbook(file);
+            var worksheet = excelWorkbook.Worksheet(1);
         
-        if (worksheet is null)
-            return (ErrorList)Error.NotFound("worksheet.not.found", "Worksheet is not found");
+            if (worksheet is null)
+                return (ErrorList)Error.NotFound("worksheet.not.found", "Worksheet is not found");
 
-        var headersResult = GetHeaders(worksheet);
+            var headersResult = GetHeaders(worksheet);
         
-        if (headersResult.IsFailure)
-            return headersResult.Error;
+            if (headersResult.IsFailure)
+                return headersResult.Error;
 
-        var headers = headersResult.Value;
+            var headers = headersResult.Value;
         
-        var results = new List<CollationRow>();
+            var results = new List<CollationRow>();
         
-        var startIndex = worksheet.CellsUsed(c => 
-                Constants.RequiredCells.Contains(c.Value.ToString().Trim().ToLower()))
+            var startIndex = worksheet.CellsUsed(c => 
+                    Constants.RequiredCells.Contains(c.Value.ToString().Trim().ToLower()))
                 .First()
                 .Address
                 .RowNumber;
 
-        for (int i = startIndex + 1; i < worksheet.LastRowUsed().RowNumber(); i++)
-        {
-            var currentRow = worksheet.Row(i);
+            for (int i = startIndex + 1; i < worksheet.LastRowUsed()!.RowNumber(); i++)
+            {
+                var currentRow = worksheet.Row(i);
             
-            var date = ReturnDate(currentRow.Cell(headers[Constants.Date]));
-            var debet = ReturnDecimal(currentRow.Cell(headers[Constants.Debet]));
-            var credit = ReturnDecimal(currentRow.Cell(headers[Constants.Credit]));
+                var date = ReturnDate(currentRow.Cell(headers[Constants.Date]));
+                var debet = ReturnDecimal(currentRow.Cell(headers[Constants.Debet]));
+                var credit = ReturnDecimal(currentRow.Cell(headers[Constants.Credit]));
             
-            if (date is null || debet is null || credit is null)
-                continue;
+                if (date is null)
+                    continue;
             
-            var isNegativePrice = debet < 0 || credit < 0;
-
-            if (isNegativePrice)
-                (debet, credit) = (Math.Abs(debet.Value), Math.Abs(credit.Value));
-
-            if ((isSecondFile == false && isNegativePrice) || (isSecondFile && isNegativePrice == false))
-                (debet, credit) = (credit, debet);
+                var collationRowResult = CollationRow.Create(i, date.Value, debet, credit);
             
-            var collationRowResult = CollationRow.Create(i, date.Value, debet.Value, credit.Value);
+                if (collationRowResult.IsFailure)
+                    return collationRowResult.Error;
             
-            if (collationRowResult.IsFailure)
-                return collationRowResult.Error;
-            
-            results.Add(collationRowResult.Value);
-        }
+                results.Add(collationRowResult.Value);
+            }
         
-        return results;
+            return results;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
     
     private DateTime? ReturnDate(IXLCell cell)
@@ -111,7 +111,7 @@ public class ExcelProvider : IFileProvider
         return null;
     }
 
-    private decimal? ReturnDecimal(IXLCell cell)
+    private decimal ReturnDecimal(IXLCell cell)
     {
         var value = cell.Value.ToString();
 

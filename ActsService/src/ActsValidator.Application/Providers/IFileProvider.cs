@@ -6,5 +6,5 @@ namespace ActsValidator.Application.Providers;
 
 public interface IFileProvider
 {
-    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file, bool isSecondFile = false);
+    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file);
 }
