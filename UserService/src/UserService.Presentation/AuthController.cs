@@ -66,16 +66,21 @@ public class AuthController : ControllerBase
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken(
-        [FromBody] RefreshTokenRequest request,
         [FromServices] RefreshTokenHandler handler,
         CancellationToken cancellationToken = default)
     {
-        var command = new RefreshTokenCommand(request.AccessToken, request.RefreshToken);
+        if (HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken) == false)
+            return Unauthorized();
         
-        var result = await handler.Handle(command, cancellationToken);
+        if (Guid.TryParse(refreshToken, out var refreshTokenGuid) == false)
+            return Errors.Token.InvalidToken().ToResponse();
+        
+        var result = await handler.Handle(refreshTokenGuid, cancellationToken);
         
         if (result.IsFailure)
             return result.Error.ToResponse();
+        
+        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
         
         return Ok(Envelope.Ok(result.Value));
     }

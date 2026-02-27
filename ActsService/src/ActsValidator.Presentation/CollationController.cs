@@ -45,7 +45,7 @@ public class CollationController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Get(
+    public async Task<IActionResult> GetByPagination(
         [FromRoute] Guid userId,
         [FromServices] GetCollationsWithPaginationHandler withPaginationHandler,
         CancellationToken cancellationToken = default)

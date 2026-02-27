@@ -5,52 +5,34 @@ using UserService.Domain.Shared;
 
 namespace UserService.Application.Commands.RefreshToken;
 
-public class RefreshTokenHandler : ICommandHandler<RefreshTokenCommand, Result<LoginUserResponse, ErrorList>>
+public class RefreshTokenHandler : ICommandHandler<Guid, Result<LoginUserResponse, ErrorList>>
 {
     private readonly IAuthRepository _authRepository;
     private readonly ITokenProvider _tokenProvider;
-    private readonly IUnitOfWork _unitOfWork;
     
-    public RefreshTokenHandler(IAuthRepository authRepository, ITokenProvider tokenProvider, IUnitOfWork unitOfWork)
+    public RefreshTokenHandler(IAuthRepository authRepository, ITokenProvider tokenProvider)
     {
         _authRepository = authRepository;
         _tokenProvider = tokenProvider;
-        _unitOfWork = unitOfWork;
     }
     
     public async Task<Result<LoginUserResponse, ErrorList>> Handle(
-        RefreshTokenCommand command, 
+        Guid refreshToken, 
         CancellationToken cancellationToken = default)
     {
         var oldRefreshSession = await _authRepository
-            .GetByRefreshToken(command.RefreshToken, cancellationToken);
+            .GetByRefreshToken(refreshToken, cancellationToken);
 
         if (oldRefreshSession.IsFailure)
             return (ErrorList)oldRefreshSession.Error;
         
-        var userClaims = await _tokenProvider.GetUserClaims(command.AccessToken);
+        if (oldRefreshSession.Value.ExpiresIn < DateTime.UtcNow)
+            return (ErrorList)Errors.Token.InvalidToken();
         
-        if (userClaims.IsFailure)
-            return userClaims.Error;
-        
-        var userIdStr = userClaims.Value.FirstOrDefault(s => s.Type == CustomClaims.Sub)?.Value;
+        var deleteResult = await _authRepository.Delete(oldRefreshSession.Value, cancellationToken);
 
-        if (Guid.TryParse(userIdStr, out var userId) == false)
-            return (ErrorList)Errors.General.Failure(userIdStr);
-        
-        if (oldRefreshSession.Value.UserId != userId)
-            return (ErrorList)Errors.Token.InvalidToken();
-        
-        var userJtiStr = userClaims.Value.FirstOrDefault(s => s.Type == CustomClaims.Jti)?.Value;
-        
-        if (Guid.TryParse(userJtiStr, out var userJti) == false)
-            return (ErrorList)Errors.General.Failure(userJtiStr);
-        
-        if (userJti != oldRefreshSession.Value.Jti)
-            return (ErrorList)Errors.Token.InvalidToken();
-        
-        _authRepository.Delete(oldRefreshSession.Value);
-        await _unitOfWork.SaveChanges(cancellationToken);
+        if (deleteResult.IsFailure)
+            return (ErrorList)deleteResult.Error;
         
         var accessToken = _tokenProvider
             .GenerateAccessToken(oldRefreshSession.Value.User);
