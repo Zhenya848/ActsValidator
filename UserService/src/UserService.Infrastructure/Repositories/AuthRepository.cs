@@ -16,9 +16,18 @@ public class AuthRepository : IAuthRepository
         _authDbContext = authDbContext;
     }
     
-    public void Delete(RefreshSession refreshSession)
+    public async Task<Result<Guid, Error>> Delete(
+        RefreshSession refreshSession, 
+        CancellationToken cancellationToken = default)
     {
-        _authDbContext.RefreshSessions.Remove(refreshSession);
+        var rowsAffected = await _authDbContext.RefreshSessions
+            .Where(t => t.RefreshToken == refreshSession.RefreshToken)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (rowsAffected == 0)
+            return Errors.Token.InvalidToken();
+
+        return refreshSession.Id;
     }
 
     public async Task<Result<RefreshSession, Error>> GetByRefreshToken(

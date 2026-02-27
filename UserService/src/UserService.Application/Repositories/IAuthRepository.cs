@@ -6,7 +6,9 @@ namespace UserService.Application.Repositories;
 
 public interface IAuthRepository
 {
-    void Delete(RefreshSession refreshSession);
+    Task<Result<Guid, Error>> Delete(
+        RefreshSession refreshSession,  
+        CancellationToken cancellationToken = default);
     
     Task<Result<RefreshSession, Error>> GetByRefreshToken(
         Guid refreshToken,
