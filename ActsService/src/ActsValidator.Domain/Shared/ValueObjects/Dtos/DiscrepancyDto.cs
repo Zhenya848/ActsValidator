@@ -6,6 +6,8 @@ public record DiscrepancyDto
     public CollationRowDto? Act2 { get; init; }
 
     public string CellName { get; init; }
+    
+    private DiscrepancyDto() { }
 
     public DiscrepancyDto(CollationRowDto? act1, CollationRowDto? act2, string cellName)
     {

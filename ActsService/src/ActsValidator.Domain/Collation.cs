@@ -40,12 +40,8 @@ public class Collation : Shared.Entity<CollationId>
 
     private static Result<List<Discrepancy>, ErrorList> GetDiscrepancies(
         List<CollationRow> act1,
-        List<CollationRow> act2)
+        List<CollationRow> reversedAct2)
     {
-        var reversedAct2 = act2.Select(x => CollationRow
-                .Create(x.SerialNumber, x.Date, Math.Abs(x.Credit), Math.Abs(x.Debet)).Value)
-        .ToList();
-        
         var counts1 = act1.GroupBy(x => x)
             .ToDictionary(g => g.Key, g => g.Count());
         
@@ -150,12 +146,12 @@ public class Collation : Shared.Entity<CollationId>
         string act1Name,
         string act2Name,
         IEnumerable<CollationRow> act1,
-        IEnumerable<CollationRow> act2)
+        IEnumerable<CollationRow> reversedAct2)
     {
         var errors = new List<Error>();
         
         var act1List = act1.ToList();
-        var act2List = act2.ToList();
+        var act2List = reversedAct2.ToList();
         
         if (string.IsNullOrWhiteSpace(act1Name))
             errors.Add(Errors.General.ValueIsRequired(nameof(act1Name)));

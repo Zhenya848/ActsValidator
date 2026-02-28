@@ -2,6 +2,7 @@ using ActsValidator.Application.Collations.Commands.Create;
 using ActsValidator.Application.Collations.Queries;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Presentation.Extensions;
+using ActsValidator.Presentation.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace ActsValidator.Presentation;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CollationController : ControllerBase
+public class ActsController : ControllerBase
 {
     [HttpPost]
     [Authorize]
@@ -43,13 +44,20 @@ public class CollationController : ControllerBase
         return Ok(Envelope.Ok(result.Value));
     }
 
-    [HttpGet]
+    [HttpGet("collations")]
     [Authorize]
     public async Task<IActionResult> GetByPagination(
-        [FromRoute] Guid userId,
-        [FromServices] GetCollationsWithPaginationHandler withPaginationHandler,
+        [FromQuery] GetCollationsWithPaginationRequest request,
+        [FromServices] GetCollationsWithPaginationHandler handler,
         CancellationToken cancellationToken = default)
     {
+        var userId = User.GetUserIdRequired();
         
+        var query = new GetCollationsWithPaginationQuery(
+            userId, request.Page, request.PageSize, request.ActName, request.OrderBy, request.OrderByDesc);
+        
+        var result = await handler.Handle(query, cancellationToken);
+        
+        return Ok(Envelope.Ok(result));
     }
 }

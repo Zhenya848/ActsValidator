@@ -1,8 +1,9 @@
 namespace ActsValidator.Application.Collations.Queries;
 
-public record GetCollationsWithPaginationCommand(
+public record GetCollationsWithPaginationQuery(
     Guid UserId,
     int Page,
     int PageSize,
     string? ActName,
-    string? OrderBy);
+    string? OrderBy,
+    bool OrderByDesc = false);

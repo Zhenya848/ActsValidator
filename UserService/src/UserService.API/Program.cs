@@ -59,6 +59,9 @@ app.UseCors(config =>
         .AllowAnyMethod();
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseHttpsRedirection();
 app.MapControllers();
 

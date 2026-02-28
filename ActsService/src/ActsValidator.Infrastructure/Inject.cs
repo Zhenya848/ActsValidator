@@ -22,6 +22,7 @@ public static class Inject
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         services.AddScoped<AppDbContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAppRepository, AppRepository>();

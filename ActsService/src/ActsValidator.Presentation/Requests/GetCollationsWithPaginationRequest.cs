@@ -4,4 +4,5 @@ public record GetCollationsWithPaginationRequest(
     int Page,
     int PageSize,
     string? ActName,
-    string? OrderBy);
+    string? OrderBy,
+    bool OrderByDesc = false);
