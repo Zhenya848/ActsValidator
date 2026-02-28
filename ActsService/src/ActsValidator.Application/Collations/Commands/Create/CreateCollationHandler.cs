@@ -48,7 +48,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
         if (file1Cells.IsFailure)
             return file1Cells.Error;
         
-        var file2Cells = _fileProvider.GetCollationRows(command.Stream2);
+        var file2Cells = _fileProvider.GetCollationRows(command.Stream2, true);
         
         if (file2Cells.IsFailure)
             return file2Cells.Error;

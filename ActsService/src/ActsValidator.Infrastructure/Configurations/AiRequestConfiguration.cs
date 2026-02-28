@@ -22,7 +22,7 @@ public class AiRequestConfiguration : IEntityTypeConfiguration<AiRequest>
         builder.Property(s => s.Status)
             .HasConversion<string>();
         
-        builder.Property(d => d.AiDiscrepancies).HasConversion(
+        builder.Property(d => d.Discrepancies).HasConversion(
                 value => JsonSerializer.Serialize(value, JsonSerializerOptions.Default),
                 json => JsonSerializer.Deserialize<List<Discrepancy>>(json, JsonSerializerOptions.Default)!)
             .HasColumnType("jsonb")

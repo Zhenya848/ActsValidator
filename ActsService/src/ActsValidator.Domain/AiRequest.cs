@@ -10,7 +10,7 @@ public class AiRequest : Shared.Entity<AiRequestId>
     public CollationId CollationId { get; private set; }
 
     public AiRequestStatus Status { get; private set; } = AiRequestStatus.Pending;
-    public List<Discrepancy> AiDiscrepancies { get; private set; } = [];
+    public List<Discrepancy> Discrepancies { get; private set; } = [];
     public string? ErrorMessage { get; private set; }
 
     private AiRequest(AiRequestId id) : base(id)
@@ -25,7 +25,7 @@ public class AiRequest : Shared.Entity<AiRequestId>
 
     public void Complete(List<Discrepancy> aiDiscrepancies)
     {
-        AiDiscrepancies = aiDiscrepancies;
+        Discrepancies = aiDiscrepancies;
         Status = AiRequestStatus.Completed;
     }
 

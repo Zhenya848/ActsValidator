@@ -12,8 +12,37 @@ namespace ActsValidator.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "act1",
+                table: "collations");
+
+            migrationBuilder.DropColumn(
+                name: "act2",
+                table: "collations");
+
+            migrationBuilder.DropColumn(
                 name: "ai_discrepancies",
                 table: "collations");
+
+            migrationBuilder.AddColumn<string>(
+                name: "act1name",
+                table: "collations",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "act2name",
+                table: "collations",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "user_id",
+                table: "collations",
+                type: "uuid",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.CreateTable(
                 name: "ai_requests",
@@ -22,7 +51,7 @@ namespace ActsValidator.Infrastructure.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     collation_id = table.Column<Guid>(type: "uuid", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false),
-                    ai_discrepancies = table.Column<string>(type: "jsonb", nullable: true),
+                    discrepancies = table.Column<string>(type: "jsonb", nullable: true),
                     error_message = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -48,6 +77,30 @@ namespace ActsValidator.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ai_requests");
+
+            migrationBuilder.DropColumn(
+                name: "act1name",
+                table: "collations");
+
+            migrationBuilder.DropColumn(
+                name: "act2name",
+                table: "collations");
+
+            migrationBuilder.DropColumn(
+                name: "user_id",
+                table: "collations");
+
+            migrationBuilder.AddColumn<string>(
+                name: "act1",
+                table: "collations",
+                type: "jsonb",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "act2",
+                table: "collations",
+                type: "jsonb",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ai_discrepancies",

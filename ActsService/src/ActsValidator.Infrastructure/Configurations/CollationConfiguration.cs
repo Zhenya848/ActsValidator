@@ -15,6 +15,8 @@ public class CollationConfiguration : IEntityTypeConfiguration<Collation>
         
         builder.Property(i => i.Id)
             .HasConversion(i => i.Value, value => CollationId.Create(value));
+        
+        builder.Property(ui => ui.UserId).IsRequired();
 
         builder.HasOne(a => a.AiRequest).WithOne()
             .HasForeignKey<AiRequest>(ci => ci.CollationId);

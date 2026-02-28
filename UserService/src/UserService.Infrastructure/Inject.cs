@@ -21,6 +21,8 @@ public static class Inject
         this IServiceCollection services, 
         IConfiguration configuration)
     {
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
+        
         services.Configure<MailOptions>(configuration.GetSection(MailOptions.SECTION_NAME));
         services.AddOptions<MailOptions>();
         

@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Commands.LoginUser;
 using UserService.Application.Commands.RefreshToken;
 using UserService.Application.Commands.RegisterUser;
 using UserService.Application.Commands.VerifyEmail;
+using UserService.Application.Queries.GetUser;
 using UserService.Domain.Shared;
 using UserService.Presentation.Extensions;
 using UserService.Presentation.Requests;
@@ -83,5 +85,12 @@ public class AuthController : ControllerBase
         HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
         
         return Ok(Envelope.Ok(result.Value));
+    }
+
+    [Authorize]
+    [HttpGet("say-hello")]
+    public async Task<IActionResult> SayHello()
+    {
+        return Ok(Envelope.Ok("Hello"));
     }
 }

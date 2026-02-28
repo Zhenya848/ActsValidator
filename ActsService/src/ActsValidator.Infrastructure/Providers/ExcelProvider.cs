@@ -33,7 +33,7 @@ public class ExcelProvider : IFileProvider
         return results.ToDictionary(x => x.Name, x => x.Cell!.Address.ColumnNumber);
     }
 
-    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file)
+    public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file, bool reverse = false)
     {
         try
         {
@@ -68,6 +68,13 @@ public class ExcelProvider : IFileProvider
             
                 if (date is null)
                     continue;
+                
+                var isNegative = debet < 0 || credit < 0;
+
+                if ((isNegative && reverse == false) || (isNegative == false && reverse))
+                    (debet, credit) = (credit, debet);
+                
+                (debet, credit) = (Math.Abs(debet), Math.Abs(credit));
             
                 var collationRowResult = CollationRow.Create(i, date.Value, debet, credit);
             
