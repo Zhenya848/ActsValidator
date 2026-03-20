@@ -46,8 +46,7 @@ public class RefreshTokenHandler : ICommandHandler<Guid, Result<LoginUserRespons
             Email = oldRefreshSession.Value.User.Email!,
             UserName = oldRefreshSession.Value.User.Email!,
             DisplayName = oldRefreshSession.Value.User.DisplayName,
-            Balance = 0,
-            TrialBalance = 0
+            EmailVerified = oldRefreshSession.Value.User.EmailConfirmed
         };
 
         return new LoginUserResponse(accessToken.AccessToken, newRefreshToken, userData);

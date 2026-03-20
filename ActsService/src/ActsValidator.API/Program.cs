@@ -1,6 +1,7 @@
 using ActsValidator.API.Middleware;
 using ActsValidator.Application;
 using ActsValidator.Infrastructure;
+using ActsValidator.Infrastructure.Hubs;
 using ActsValidator.Presentation;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -63,6 +64,8 @@ app.UseCors(config =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<AnalysisHub>("analysis-hub");
 
 app.UseHttpsRedirection();
 app.MapControllers();

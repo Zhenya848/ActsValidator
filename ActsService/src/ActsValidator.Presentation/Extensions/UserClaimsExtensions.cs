@@ -36,6 +36,17 @@ public static class UserClaimsExtensions
         return user.FindFirst(CustomClaims.Email)?.Value;
     }
 
+    public static string? GetUserEmailVerified(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(CustomClaims.EmailVerified)?.Value;
+    }
+
+    public static string GetUserEmailVerifiedRequired(this ClaimsPrincipal user)
+    {
+        return user.FindFirst(CustomClaims.EmailVerified)?.Value
+            ?? throw new UnauthorizedAccessException("User email verified not found in claims");
+    }
+
     public static string GetUserNameRequired(this ClaimsPrincipal user)
     {
         return user.FindFirst(CustomClaims.Name)?.Value 

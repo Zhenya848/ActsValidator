@@ -5,11 +5,13 @@ using ActsValidator.Application.Repositories;
 using ActsValidator.Infrastructure.Authorization;
 using ActsValidator.Infrastructure.Consumers;
 using ActsValidator.Infrastructure.DbContexts;
+using ActsValidator.Infrastructure.Hubs;
 using ActsValidator.Infrastructure.Providers;
 using ActsValidator.Infrastructure.Repositories;
 using ActsValidator.Presentation.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +24,9 @@ public static class Inject
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddSignalR();
+        services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+        
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         services.AddScoped<AppDbContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -48,6 +53,21 @@ public static class Inject
 
             options.TokenValidationParameters = TokenValidationParametersFactory
                 .CreateWithLifeTime(key);
+            
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    
+                    if (!string.IsNullOrEmpty(accessToken) && 
+                        context.HttpContext.Request.Path.StartsWithSegments("/analysis-hub"))
+                    {
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
         });
         
         services.Configure<MessageBrokerOptions>(

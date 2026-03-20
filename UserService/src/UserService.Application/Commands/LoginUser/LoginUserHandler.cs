@@ -42,8 +42,7 @@ public class LoginUserHandler : ICommandHandler<LoginUserCommand, Result<LoginUs
             Email = user.Email!,
             UserName = user.Email!,
             DisplayName = user.DisplayName,
-            Balance = 0,
-            TrialBalance = 0
+            EmailVerified = user.EmailConfirmed
         };
         
         return new LoginUserResponse(accessToken.AccessToken, refreshToken, userData);

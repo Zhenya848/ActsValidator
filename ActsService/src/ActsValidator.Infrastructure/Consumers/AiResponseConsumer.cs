@@ -4,10 +4,12 @@ using ActsValidator.Domain.Shared.ValueObjects;
 using ActsValidator.Domain.Shared.ValueObjects.Dtos;
 using ActsValidator.Domain.ValueObjects;
 using ActsValidator.Infrastructure.DbContexts;
+using ActsValidator.Infrastructure.Hubs;
 using ActsValidator.Presentation.Extensions;
 using AiMessaging.Contracts.Messaging;
 using CSharpFunctionalExtensions;
 using MassTransit;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,17 +20,24 @@ public class AiResponseConsumer : IConsumer<AiResponseEvent>
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<AiResponseConsumer> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHubContext<AnalysisHub> _hubContext;
 
-    public AiResponseConsumer(AppDbContext appDbContext, ILogger<AiResponseConsumer> logger, IUnitOfWork unitOfWork)
+    public AiResponseConsumer(
+        AppDbContext appDbContext, 
+        ILogger<AiResponseConsumer> logger, 
+        IUnitOfWork unitOfWork, 
+        IHubContext<AnalysisHub> hubContext)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _hubContext = hubContext;
     }
     
     public async Task Consume(ConsumeContext<AiResponseEvent> context)
     {
         var aiRequestExist = await _appDbContext.AiRequests
+            .Include(c => c.Collation)
             .FirstOrDefaultAsync(r => r.Id == context.Message.AiRequestId);
 
         if (aiRequestExist is null)
@@ -36,6 +45,21 @@ public class AiResponseConsumer : IConsumer<AiResponseEvent>
             _logger.LogError("Can't find AiRequest with Id {id}", context.Message.AiRequestId);
             return;
         }
+        
+        if (context.Message.Error is not null)
+        {
+            _logger.LogError("Error - {error}", context.Message.Error);
+            var setMessageResult = aiRequestExist.SetErrorMessage(context.Message.Error);
+            
+            if (setMessageResult.IsFailure)
+                _logger.LogError("{code} - {message}", setMessageResult.Error.Code, setMessageResult.Error.Message);
+            
+            await _unitOfWork.SaveChanges(context.CancellationToken);
+            return;
+        }
+        
+        if (context.Message.Response is null)
+            return;
 
         var discrepanciesDtoResult = context.Message.Response
             .ConvertJsonToType<List<DiscrepancyDto>>();
@@ -54,25 +78,9 @@ public class AiResponseConsumer : IConsumer<AiResponseEvent>
             .Select(d =>
             {
                 var errors = new List<Error>();
-                
-                var act1 = d.Act1 is not null
-                    ? CollationRow.Create(d.Act1.SerialNumber, d.Act1.Date, d.Act1.Debet, d.Act1.Credit)
-                    : (Result<CollationRow, ErrorList>?)null;
 
-                if (act1 is not null && act1.Value.IsFailure)
-                    errors.AddRange(act1.Value.Error);
-
-                var act2 = d.Act2 is not null
-                    ? CollationRow.Create(d.Act2.SerialNumber, d.Act2.Date, d.Act2.Debet, d.Act2.Credit)
-                    : (Result<CollationRow, ErrorList>?)null;
-
-                if (act2 is not null && act2.Value.IsFailure)
-                {
-                    errors.AddRange(act2.Value.Error);
-                    return Result.Failure<Discrepancy, ErrorList>(errors);
-                }
-
-                var discrepancy = Discrepancy.Create(act1?.Value, act2?.Value, d.CellName);
+                var discrepancy = Discrepancy
+                    .Create(d.Act1Row, d.Act2Row, d.Act1Value, d.Act2Value, d.Field, d.Difference, d.Severity);
                 
                 if (discrepancy.IsFailure)
                     errors.AddRange(discrepancy.Error);
@@ -94,8 +102,26 @@ public class AiResponseConsumer : IConsumer<AiResponseEvent>
             return;
         }
         
-        aiRequestExist.Complete(discrepancies.Select(x => x.Value).ToList());
+        discrepancies.ForEach(x =>
+        {
+            if (aiRequestExist.Collation.CollationErrors.TryGetValue(x.Value, out var discrepancy))
+                discrepancy.AddDetectedCharacter(Constants.DetectedBy.Ai);
+            else
+                aiRequestExist.Collation.CollationErrors.Add(x.Value);
+        });
+
+        aiRequestExist.Complete();
         
         await _unitOfWork.SaveChanges(context.CancellationToken);
+
+        var discrepanciesForHub = aiRequestExist.Collation.CollationErrors
+            .Select(x => new DiscrepancyDto(x.Act1Row, x.Act2Row, x.Act1Value, x.Act2Value,
+                x.Field, x.Difference, x.Severity, x.DetectedBy.ToArray()));
+        
+        await _hubContext.Clients.User(aiRequestExist.Collation.UserId.ToString())
+            .SendAsync("ReceiveAiAnalysis", new { 
+                requestId = context.Message.AiRequestId, 
+                discrepancies = discrepanciesForHub
+            });
     }
 }

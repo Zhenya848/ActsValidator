@@ -47,12 +47,11 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
         if (errors.Count > 0)
             return (ErrorList)errors;
 
-        var user = new User
-        {
-            Email = command.Email,
-            UserName = command.Email,
-            DisplayName = command.UserName
-        };
+        var user = new User();
+        var updateResult = user.Update(command.UserName, command.Email);
+        
+        if (updateResult.IsFailure)
+            return updateResult.Error;
 
         var userExist = await _userManager.FindByEmailAsync(command.Email);
 
@@ -78,20 +77,13 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
 
             var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var confirmationLink = $"http://localhost:5172/api/auth/email-verification" +
-                                   $"?userId={user.Id}&token={Base64UrlEncoder.Encode(confirmationToken)}";
+            var sendVerificationCodeResult = await _emailSender
+                .SendVerificationCode(user.Id, confirmationToken, command.Email);
 
-            var subject = "Подтверждение регистрации";
-            var body = $"Для подтверждения регистрации перейдите по ссылке: {confirmationLink}";
-
-            var mailData = new MailData(command.Email, subject, body);
-
-            var sendMessageResult = await _emailSender.Send(mailData);
-
-            if (sendMessageResult.IsFailure)
+            if (sendVerificationCodeResult.IsFailure)
             {
                 transaction.Rollback();
-                return sendMessageResult.Error;
+                return sendVerificationCodeResult.Error;
             }
             
             transaction.Commit();

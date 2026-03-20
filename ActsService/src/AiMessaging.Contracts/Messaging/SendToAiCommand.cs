@@ -1,3 +1,3 @@
 ﻿namespace AiMessaging.Contracts.Messaging;
 
-public record SendToAiCommand(string Prompt, Guid AiRequestId);
+public record SendToAiCommand(Guid AiRequestId, string Prompt);

@@ -38,7 +38,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
     }
 
     public async Task<Result<CollationDto, ErrorList>> Handle(
-        CreateCollationCommand command, 
+        CreateCollationCommand command,
         CancellationToken cancellationToken = default)
     {
         using var transaction = await _unitOfWork.BeginTransaction(cancellationToken);
@@ -61,19 +61,19 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
 
         try
         {
-            var createCollationResult = _appRepository.AddCollation(collationResult.Value);
+            _appRepository.AddCollation(collationResult.Value);
 
-            var aiRequest = new AiRequest(AiRequestId.AddNewId(), CollationId.Create(createCollationResult));
+            var aiRequest = new AiRequest(AiRequestId.AddNewId(), collationResult.Value);
             var createAiRequestResult = _appRepository.AddAiRequest(aiRequest);
 
             var prompt = GeneratePrompt(file1Cells.Value, file2Cells.Value);
-            var sendToAiCommand = new SendToAiCommand(prompt, createAiRequestResult);
+            var sendToAiCommand = new SendToAiCommand(createAiRequestResult, prompt);
             
             await _publishEndpoint.Publish(sendToAiCommand, cancellationToken);
             
             await _unitOfWork.SaveChanges(cancellationToken);
 
-            var result = GetResult(collationResult.Value);
+            var result = GetResult(collationResult.Value, aiRequest.Status);
             
             transaction.Commit();
 
@@ -90,22 +90,24 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
         }
     }
 
-    private CollationDto GetResult(Collation collation)
+    private CollationDto GetResult(Collation collation, AiRequestStatus aiRequestStatus)
     {
-        var discrepancies = collation.Discrepancies
-            .Select(x =>
-            {
-                var c1 = x.Act1 is not null 
-                    ? new CollationRowDto(x.Act1.SerialNumber, x.Act1.Date, x.Act1.Debet, x.Act1.Credit) : null;
-                
-                var c2 = x.Act2 is not null 
-                    ? new CollationRowDto(x.Act2.SerialNumber, x.Act2.Date, x.Act2.Debet, x.Act2.Credit) : null;
-                
-                return new DiscrepancyDto(c1, c2, x.CellName);
-            })
+        var discrepancies = collation.CollationErrors
+            .Select(x => new DiscrepancyDto(
+                x.Act1Row, x.Act2Row, x.Act1Value, x.Act2Value, x.Field, x.Difference, x.Severity, x.DetectedBy.ToArray()))
             .ToArray();
         
-        return new CollationDto(collation.UserId, collation.Id, collation.Act1Name, collation.Act2Name, discrepancies);
+        return new CollationDto(
+            collation.UserId, 
+            collation.Id, 
+            collation.Act1Name, 
+            collation.Act2Name, 
+            collation.CoincidencesCount, 
+            collation.RowsProcessed, 
+            discrepancies, 
+            collation.Status.ToString(), 
+            aiRequestStatus.ToString(), 
+            collation.CreatedAt);
     }
 
     private string GeneratePrompt(IEnumerable<CollationRow> act1, IEnumerable<CollationRow> act2)
@@ -127,8 +129,8 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
 
         var discrepanciesExample = new List<Discrepancy>()
         {
-            Discrepancy.Create(collation1Example, collation2Example, "дебет").Value,
-            Discrepancy.Create(collation3Example, collation4Example, "время").Value
+            Discrepancy.Create(collation1Example, collation2Example).Value,
+            Discrepancy.Create(collation3Example, collation4Example).Value
         };
         
         var discrepanciesExampleToJson = JsonConvert.SerializeObject(discrepanciesExample);
