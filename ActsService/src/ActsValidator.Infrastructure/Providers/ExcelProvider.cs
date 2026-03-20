@@ -13,7 +13,7 @@ public class ExcelProvider : IFileProvider
     {
         var searchRange = worksheet.Range(1, 1, 20, 20);
         
-        var results = Constants.RequiredCells
+        var results = Constants.DiscrepancyFields.RequiredCells
             .Select(name => new
             {
                 Name = name,
@@ -53,7 +53,7 @@ public class ExcelProvider : IFileProvider
             var results = new List<CollationRow>();
         
             var startIndex = worksheet.CellsUsed(c => 
-                    Constants.RequiredCells.Contains(c.Value.ToString().Trim().ToLower()))
+                    Constants.DiscrepancyFields.RequiredCells.Contains(c.Value.ToString().Trim().ToLower()))
                 .First()
                 .Address
                 .RowNumber;
@@ -62,9 +62,9 @@ public class ExcelProvider : IFileProvider
             {
                 var currentRow = worksheet.Row(i);
             
-                var date = ReturnDate(currentRow.Cell(headers[Constants.Date]));
-                var debet = ReturnDecimal(currentRow.Cell(headers[Constants.Debet]));
-                var credit = ReturnDecimal(currentRow.Cell(headers[Constants.Credit]));
+                var date = ReturnDate(currentRow.Cell(headers[Constants.DiscrepancyFields.Date]));
+                var debet = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Debet]));
+                var credit = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Credit]));
             
                 if (date is null)
                     continue;

@@ -8,8 +8,13 @@ public record CollationDto
     public string Act1Name { get; init; }
     public string Act2Name { get; init; }
 
-    public DiscrepancyDto[] Discrepancies { get; init; } = [];
-    public AiRequestDto? AiRequest { get; init; }
+    public int CoincidencesCount { get; init; }
+    public int RowsProcessed { get; init; }
+    public DiscrepancyDto[] CollationErrors { get; init; } = [];
+    
+    public string Status { get; init; }
+    public string AiRequestStatus { get; init; }
+    public DateTime CreatedAt { get; init; }
 
     private CollationDto() { }
     
@@ -18,14 +23,22 @@ public record CollationDto
         Guid id, 
         string act1Name, 
         string act2Name, 
-        DiscrepancyDto[] discrepancies,  
-        AiRequestDto? aiRequest = null)
+        int coincidencesCount,
+        int rowsProcessed,
+        DiscrepancyDto[] errors,
+        string status,
+        string aiRequestStatus,
+        DateTime createdAt)
     {
         Id = id;
         UserId = userId;
         Act1Name = act1Name;
         Act2Name = act2Name;
-        Discrepancies = discrepancies;
-        AiRequest = aiRequest;
+        CoincidencesCount = coincidencesCount;
+        RowsProcessed = rowsProcessed;
+        CollationErrors = errors;
+        Status = status;
+        AiRequestStatus = aiRequestStatus;
+        CreatedAt = createdAt;
     }
 }

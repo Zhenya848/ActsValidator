@@ -30,6 +30,9 @@ public class Errors
             
         public static Error WrongCredentials() =>
             Error.Validation("user.wrong.credentials", "user with wrong credentials");
+        
+        public static Error NotVerified() =>
+            Error.Validation("user.not.verified", "user email not verified");
     }
     
     public static class Token

@@ -8,8 +8,5 @@ public record UserInfo()
     public string DisplayName { get; set; }
     
     public string Email { get; set; }
-    
-    
-    public int Balance { get; set; }
-    public int TrialBalance { get; set; }
+    public bool EmailVerified { get; set; }
 }

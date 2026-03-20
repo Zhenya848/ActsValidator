@@ -20,6 +20,11 @@ public class ActsController : ControllerBase
         [FromServices] CreateCollationHandler handler,
         CancellationToken cancellationToken = default)
     {
+        var userEmailVerified = User.GetUserEmailVerifiedRequired();
+
+        if (bool.TryParse(userEmailVerified, out bool userEmailVerifiedResult) && userEmailVerifiedResult == false)
+            return Errors.User.NotVerified().ToResponse();
+        
         if (files.Count < 2)
         {
             var error = Error.NotFound("files.not.fount", "Files count must be greater than 2");
@@ -54,7 +59,7 @@ public class ActsController : ControllerBase
         var userId = User.GetUserIdRequired();
         
         var query = new GetCollationsWithPaginationQuery(
-            userId, request.Page, request.PageSize, request.ActName, request.OrderBy, request.OrderByDesc);
+            userId, request.Page, request.PageSize, request.ActName, request.StatusFilter);
         
         var result = await handler.Handle(query, cancellationToken);
         

@@ -7,7 +7,7 @@ using UserService.Domain.Shared;
 
 namespace UserService.Application.Commands.VerifyEmail;
 
-public class VerifyEmailHandler : ICommandHandler<VerifyEmailCommand, Result<Guid, ErrorList>>
+public class VerifyEmailHandler : ICommandHandler<VerifyEmailCommand, UnitResult<ErrorList>>
 {
     private readonly UserManager<User> _userManager;
 
@@ -16,7 +16,7 @@ public class VerifyEmailHandler : ICommandHandler<VerifyEmailCommand, Result<Gui
         _userManager = userManager;
     }
     
-    public async Task<Result<Guid, ErrorList>> Handle(
+    public async Task<UnitResult<ErrorList>> Handle(
         VerifyEmailCommand command, 
         CancellationToken cancellationToken = default)
     {
@@ -30,6 +30,6 @@ public class VerifyEmailHandler : ICommandHandler<VerifyEmailCommand, Result<Gui
         if (result.Succeeded == false)
             return (ErrorList)result.Errors.Select(e => Error.Failure(e.Code, e.Description)).ToList();
         
-        return user.Id;
+        return Result.Success<ErrorList>();
     }
 }

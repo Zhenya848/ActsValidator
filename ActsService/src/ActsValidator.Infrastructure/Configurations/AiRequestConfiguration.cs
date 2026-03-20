@@ -16,17 +16,12 @@ public class AiRequestConfiguration : IEntityTypeConfiguration<AiRequest>
         builder.Property(i => i.Id)
             .HasConversion(i => i.Value, value => AiRequestId.Create(value));
         
-        builder.Property(i => i.CollationId)
-            .HasConversion(i => i.Value, value => CollationId.Create(value));
+        builder.HasOne(x => x.Collation)
+            .WithOne()
+            .HasForeignKey<AiRequest>("collation_id");
 
         builder.Property(s => s.Status)
             .HasConversion<string>();
-        
-        builder.Property(d => d.Discrepancies).HasConversion(
-                value => JsonSerializer.Serialize(value, JsonSerializerOptions.Default),
-                json => JsonSerializer.Deserialize<List<Discrepancy>>(json, JsonSerializerOptions.Default)!)
-            .HasColumnType("jsonb")
-            .IsRequired(false);
 
         builder.Property(e => e.ErrorMessage);
     }

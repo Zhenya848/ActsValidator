@@ -14,9 +14,12 @@ public class Collation : Shared.Entity<CollationId>
     public string Act1Name { get; }
     public string Act2Name { get; }
 
-    public List<Discrepancy> Discrepancies { get; } = [];
+    public int CoincidencesCount { get; }
+    public int RowsProcessed { get; }
     
-    public AiRequest? AiRequest { get; }
+    public HashSet<Discrepancy> CollationErrors { get; } = [];
+    public CollationStatus Status { get; init; }
+    public DateTime CreatedAt { get; init; }
     
     private Collation(CollationId id) : base(id)
     {
@@ -28,17 +31,30 @@ public class Collation : Shared.Entity<CollationId>
         Guid userId,
         string act1Name, 
         string act2Name,
-        List<Discrepancy> discrepancies) : base(id)
+        int coincidencesCount,
+        int rowsProcessed,
+        HashSet<Discrepancy> collationErrors,
+        DateTime createdAt) : base(id)
     {
         UserId = userId;
         
         Act1Name = act1Name;
         Act2Name = act2Name;
+        CoincidencesCount = coincidencesCount;
+        RowsProcessed = rowsProcessed;
         
-        Discrepancies = discrepancies;
+        CollationErrors = collationErrors;
+        Status = collationErrors.Count switch
+        {
+            < 1 => CollationStatus.Success,
+            < 10 => CollationStatus.Warning,
+            _ => CollationStatus.Error
+        };
+        
+        CreatedAt = createdAt;
     }
-
-    private static Result<List<Discrepancy>, ErrorList> GetDiscrepancies(
+    
+    private static Result<CollationResult, ErrorList> Compare(
         List<CollationRow> act1,
         List<CollationRow> reversedAct2)
     {
@@ -76,19 +92,11 @@ public class Collation : Shared.Entity<CollationId>
         var diff2ByDate = diff2.ToLookup(r => r.Date);
         var diff2ByAmount = diff2.ToLookup(r => (r.Debet, r.Credit));
         
-        var result = new List<Discrepancy>();
+        var totalDiscrepancies = new HashSet<Discrepancy>();
+        
+        var coincidencesCount = (act1.Count + reversedAct2.Count - diff1.Count - diff2.Count) / 2;
+        
         var usedRowsSerialNumbers = new HashSet<int>();
-
-        if (diff1.Count == 0)
-        {
-            var discrepancies = diff2.Select(x => Discrepancy
-                .Create(null, x, Constants.Date)).ToList();
-
-            if (discrepancies.Any(x => x.IsFailure))
-                return (ErrorList)discrepancies.SelectMany(x => x.Error).ToList();
-            
-            return discrepancies.Select(x => x.Value).ToList();
-        }
 
         foreach (var row in diff1)
         {
@@ -101,16 +109,15 @@ public class Collation : Shared.Entity<CollationId>
                     .Create(row2ByDate.SerialNumber, row2ByDate.Date, row2ByDate.Credit, row2ByDate.Debet)
                     .Value;
                 
-                var discrepancyResult = Discrepancy.Create(
-                    row, 
-                    normalizedRow2, 
-                    row.Debet != row2ByDate.Debet ? Constants.Debet : Constants.Credit);
+                var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
             
                 if (discrepancyResult.IsFailure)
                     return discrepancyResult.Error;
+
+                discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
                 
                 usedRowsSerialNumbers.Add(row2ByDate.SerialNumber);
-                result.Add(discrepancyResult.Value);
+                totalDiscrepancies.Add(discrepancyResult.Value);
             }
             else
             {
@@ -126,7 +133,7 @@ public class Collation : Shared.Entity<CollationId>
                             row2ByAmount.Debet).Value 
                     : null;
                 
-                var discrepancyResult = Discrepancy.Create(row, normalizedRow2, Constants.Date);
+                var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
                 
                 if (discrepancyResult.IsFailure)
                     return discrepancyResult.Error;
@@ -134,11 +141,38 @@ public class Collation : Shared.Entity<CollationId>
                 if (normalizedRow2 != null)
                     usedRowsSerialNumbers.Add(normalizedRow2.SerialNumber);
                 
-                result.Add(discrepancyResult.Value);
+                discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
+                
+                totalDiscrepancies.Add(discrepancyResult.Value);
             }
         }
+
+        var diff2WithNoPair = diff2
+            .Where(d => usedRowsSerialNumbers.Contains(d.SerialNumber) == false)
+            .ToArray();
+
+        if (diff2WithNoPair.Length < 1) 
+            return new CollationResult(totalDiscrepancies, coincidencesCount);
         
-        return result;
+        var discrepancies = diff2WithNoPair
+            .Select(x =>
+            {
+                var discrepancyResult = Discrepancy.Create(null, x);
+                
+                if (discrepancyResult.IsSuccess)
+                    discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
+
+                return discrepancyResult;
+            })
+            .ToArray();
+            
+        if (discrepancies.Any(x => x.IsFailure))
+            return (ErrorList)discrepancies.SelectMany(x => x.Error).ToList();
+
+        foreach (var discrepancy in discrepancies)
+            totalDiscrepancies.Add(discrepancy.Value);
+        
+        return new CollationResult(totalDiscrepancies, coincidencesCount);
     }
 
     public static Result<Collation, ErrorList> Create(
@@ -159,14 +193,22 @@ public class Collation : Shared.Entity<CollationId>
         if (string.IsNullOrWhiteSpace(act2Name))
             errors.Add(Errors.General.ValueIsRequired(nameof(act2Name)));
         
-        var discrepanciesResult = GetDiscrepancies(act1List, act2List);
+        var collationResult = Compare(act1List, act2List);
         
-        if (discrepanciesResult.IsFailure) 
-            errors.AddRange(discrepanciesResult.Error);
+        if (collationResult.IsFailure) 
+            errors.AddRange(collationResult.Error);
 
         if (errors.Count > 0)
             return (ErrorList)errors;
         
-        return new Collation(CollationId.AddNewId(), userId, act1Name, act2Name, discrepanciesResult.Value);
+        return new Collation(
+            CollationId.AddNewId(), 
+            userId, 
+            act1Name, 
+            act2Name, 
+            collationResult.Value.CoincidencesCount, 
+            act1List.Count + act2List.Count,
+            collationResult.Value.Errors, 
+            DateTime.UtcNow);
     }
 }

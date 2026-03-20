@@ -2,6 +2,7 @@ using System.Data;
 using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using UserService.Application.Abstractions;
 using UserService.Application.Commands.RegisterUser;
@@ -20,6 +21,24 @@ public class EmailSender : IEmailSender
     {
         _mailOptions = mailOptions.Value;
         _logger = logger;
+    }
+
+    public async Task<UnitResult<ErrorList>> SendVerificationCode(Guid userId, string confirmationToken, string email)
+    {
+        var confirmationLink = $"http://localhost:5173/email-verified" +
+                               $"?userId={userId}&token={Base64UrlEncoder.Encode(confirmationToken)}";
+
+        var subject = "Подтверждение регистрации";
+        var body = $"Для подтверждения регистрации перейдите по ссылке: {confirmationLink}";
+
+        var mailData = new MailData(email, subject, body);
+
+        var sendMessageResult = await Send(mailData);
+        
+        if (sendMessageResult.IsFailure)
+            return sendMessageResult.Error;
+        
+        return Result.Success<ErrorList>();
     }
     
     public async Task<UnitResult<ErrorList>> Send(MailData mailData)

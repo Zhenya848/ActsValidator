@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ActsValidator.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260227175430_init")]
-    partial class init
+    [Migration("20260319070800_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,14 +31,6 @@ namespace ActsValidator.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("CollationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("collation_id");
-
-                    b.Property<string>("Discrepancies")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("discrepancies");
-
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text")
                         .HasColumnName("error_message");
@@ -48,10 +40,14 @@ namespace ActsValidator.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("status");
 
+                    b.Property<Guid>("collation_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("collation_id");
+
                     b.HasKey("Id")
                         .HasName("pk_ai_requests");
 
-                    b.HasIndex("CollationId")
+                    b.HasIndex("collation_id")
                         .IsUnique()
                         .HasDatabaseName("ix_ai_requests_collation_id");
 
@@ -74,9 +70,26 @@ namespace ActsValidator.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("act2name");
 
-                    b.Property<string>("Discrepancies")
+                    b.Property<int>("CoincidencesCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("coincidences_count");
+
+                    b.Property<string>("CollationErrors")
                         .HasColumnType("jsonb")
-                        .HasColumnName("discrepancies");
+                        .HasColumnName("collation_errors");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("RowsProcessed")
+                        .HasColumnType("integer")
+                        .HasColumnName("rows_processed");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -90,17 +103,14 @@ namespace ActsValidator.Infrastructure.Migrations
 
             modelBuilder.Entity("ActsValidator.Domain.AiRequest", b =>
                 {
-                    b.HasOne("ActsValidator.Domain.Collation", null)
-                        .WithOne("AiRequest")
-                        .HasForeignKey("ActsValidator.Domain.AiRequest", "CollationId")
+                    b.HasOne("ActsValidator.Domain.Collation", "Collation")
+                        .WithOne()
+                        .HasForeignKey("ActsValidator.Domain.AiRequest", "collation_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_ai_requests_collations_collation_id");
-                });
 
-            modelBuilder.Entity("ActsValidator.Domain.Collation", b =>
-                {
-                    b.Navigation("AiRequest");
+                    b.Navigation("Collation");
                 });
 #pragma warning restore 612, 618
         }

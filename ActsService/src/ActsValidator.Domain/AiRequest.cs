@@ -7,10 +7,9 @@ namespace ActsValidator.Domain;
 
 public class AiRequest : Shared.Entity<AiRequestId>
 {
-    public CollationId CollationId { get; private set; }
+    public Collation Collation { get; private set; }
 
     public AiRequestStatus Status { get; private set; } = AiRequestStatus.Pending;
-    public List<Discrepancy> Discrepancies { get; private set; } = [];
     public string? ErrorMessage { get; private set; }
 
     private AiRequest(AiRequestId id) : base(id)
@@ -18,14 +17,13 @@ public class AiRequest : Shared.Entity<AiRequestId>
         
     }
     
-    public AiRequest(AiRequestId id, CollationId collationId) : base(id)
+    public AiRequest(AiRequestId id, Collation collation) : base(id)
     {
-        CollationId = collationId;
+        Collation = collation;
     }
 
-    public void Complete(List<Discrepancy> aiDiscrepancies)
+    public void Complete()
     {
-        Discrepancies = aiDiscrepancies;
         Status = AiRequestStatus.Completed;
     }
 

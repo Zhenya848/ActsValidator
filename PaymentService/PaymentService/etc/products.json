@@ -1,0 +1,17 @@
+[
+  {
+    "productId": "2_collations",
+    "price": 190,
+    "pack": 2
+  },
+  {
+    "productId": "5_collations",
+    "price": 349,
+    "pack": 5
+  },
+  {
+    "productId": "10_collations",
+    "price": 590,
+    "pack": 10
+  }
+]
