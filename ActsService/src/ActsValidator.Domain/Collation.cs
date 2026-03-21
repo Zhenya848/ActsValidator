@@ -93,58 +93,62 @@ public class Collation : Shared.Entity<CollationId>
         var diff2ByAmount = diff2.ToLookup(r => (r.Debet, r.Credit));
         
         var totalDiscrepancies = new HashSet<Discrepancy>();
-        
         var coincidencesCount = (act1.Count + reversedAct2.Count - diff1.Count - diff2.Count) / 2;
         
         var usedRowsSerialNumbers = new HashSet<int>();
+        var possibleByDate = new List<CollationRow>();
 
         foreach (var row in diff1)
         {
             var row2ByDate = diff2ByDate[row.Date]
                 .FirstOrDefault(r => usedRowsSerialNumbers.Contains(r.SerialNumber) == false);
 
-            if (row2ByDate != null)
+            if (row2ByDate is null)
             {
-                var normalizedRow2 = CollationRow
-                    .Create(row2ByDate.SerialNumber, row2ByDate.Date, row2ByDate.Credit, row2ByDate.Debet)
-                    .Value;
-                
-                var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
+                possibleByDate.Add(row);
+                continue;
+            }
             
-                if (discrepancyResult.IsFailure)
-                    return discrepancyResult.Error;
+            var normalizedRow2 = CollationRow
+                .Create(row2ByDate.SerialNumber, row2ByDate.Date, row2ByDate.Credit, row2ByDate.Debet)
+                .Value;
+                
+            var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
+            
+            if (discrepancyResult.IsFailure)
+                return discrepancyResult.Error;
 
-                discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
+            discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
                 
-                usedRowsSerialNumbers.Add(row2ByDate.SerialNumber);
-                totalDiscrepancies.Add(discrepancyResult.Value);
-            }
-            else
-            {
-                var row2ByAmount = diff2ByAmount[(row.Debet, row.Credit)]
-                    .FirstOrDefault(r => usedRowsSerialNumbers.Contains(r.SerialNumber) == false);
+            usedRowsSerialNumbers.Add(row2ByDate.SerialNumber);
+            totalDiscrepancies.Add(discrepancyResult.Value);
+        }
+
+        foreach (var row in possibleByDate)
+        {
+            var row2ByAmount = diff2ByAmount[(row.Debet, row.Credit)]
+                .FirstOrDefault(r => usedRowsSerialNumbers.Contains(r.SerialNumber) == false);
                 
-                var normalizedRow2 = row2ByAmount is not null 
-                    ? 
-                    CollationRow.Create(
-                            row2ByAmount.SerialNumber, 
-                            row2ByAmount.Date, 
-                            row2ByAmount.Credit, 
-                            row2ByAmount.Debet).Value 
-                    : null;
+            var normalizedRow2 = row2ByAmount is not null 
+                ? 
+                CollationRow.Create(
+                    row2ByAmount.SerialNumber, 
+                    row2ByAmount.Date, 
+                    row2ByAmount.Credit, 
+                    row2ByAmount.Debet).Value 
+                : null;
                 
-                var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
+            var discrepancyResult = Discrepancy.Create(row, normalizedRow2);
                 
-                if (discrepancyResult.IsFailure)
-                    return discrepancyResult.Error;
+            if (discrepancyResult.IsFailure)
+                return discrepancyResult.Error;
                 
-                if (normalizedRow2 != null)
-                    usedRowsSerialNumbers.Add(normalizedRow2.SerialNumber);
+            if (normalizedRow2 != null)
+                usedRowsSerialNumbers.Add(normalizedRow2.SerialNumber);
                 
-                discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
+            discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
                 
-                totalDiscrepancies.Add(discrepancyResult.Value);
-            }
+            totalDiscrepancies.Add(discrepancyResult.Value);
         }
 
         var diff2WithNoPair = diff2
@@ -160,7 +164,7 @@ public class Collation : Shared.Entity<CollationId>
                 var discrepancyResult = Discrepancy.Create(null, x);
                 
                 if (discrepancyResult.IsSuccess)
-                    discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Ai);
+                    discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
 
                 return discrepancyResult;
             })
