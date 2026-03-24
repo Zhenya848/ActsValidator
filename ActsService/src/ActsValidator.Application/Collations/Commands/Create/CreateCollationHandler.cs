@@ -127,11 +127,11 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
         
         var act2Example = new List<CollationRow>()
         {
-            CollationRow.Create(20, DateTime.UtcNow.AddMonths(-5).AddDays(-9), 0, (decimal)900.6).Value,
+            CollationRow.Create(20, DateTime.UtcNow.AddMonths(-5).AddDays(-9), 0, (decimal)997.6).Value,
             CollationRow.Create(21, DateTime.UtcNow.AddMonths(-5).AddDays(-10), 0, 1000).Value,
             CollationRow.Create(22, DateTime.UtcNow.AddMonths(-2), 0, 1521).Value,
             CollationRow.Create(23, DateTime.UtcNow.AddMonths(-4).AddDays(-3), 0, (decimal)1976.4).Value,
-            CollationRow.Create(24, DateTime.UtcNow.AddMonths(-4).AddDays(-2), 0, (decimal)1552.4).Value
+            CollationRow.Create(24, DateTime.UtcNow.AddMonths(-4).AddDays(-2), 0, (decimal)6000.4).Value
         };
 
         var discrepanciesExample = new List<Discrepancy>()
@@ -143,6 +143,8 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
             Discrepancy.Create(act1Example[4], null).Value,
             Discrepancy.Create(act1Example[5], null).Value
         };
+        
+        discrepanciesExample.ForEach(d => d.AddDetectedCharacter(Constants.DetectedBy.Ai));
         
         var act1ExampleToJson = JsonConvert.SerializeObject(act1Example);
         var act2ExampleToJson = JsonConvert.SerializeObject(act2Example);

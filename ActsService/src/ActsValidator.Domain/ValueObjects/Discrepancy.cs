@@ -17,19 +17,29 @@ public record Discrepancy
     public string Field { get; init; }
     public string Severity { get; init; }
     public HashSet<string> DetectedBy { get; init; } = [];
+    
+    public virtual bool Equals(Discrepancy? other) =>
+        Act1Row == other?.Act1Row && Act2Row == other?.Act2Row && Act1Value == other?.Act1Value 
+        && Act2Value == other?.Act2Value && Difference == other?.Difference && Field == other?.Field 
+        && Severity == other?.Severity;
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Act1Row, Act2Row, Act1Value, Act2Value, Difference, Field);
+    }
 
     [JsonConstructor]
-    private Discrepancy(int? act1Row, int? act2Row, string act1Value, string act2Value, 
-        string field, string difference, string severity, IEnumerable<string> detectedBy)
+    private Discrepancy(int? act1Row, int? act2Row, string? act1Value, string? act2Value, 
+        string field, string difference, string severity, HashSet<string> detectedBy)
     {
         Act1Row = act1Row;
         Act2Row = act2Row;
-        Act1Value = act1Value;
-        Act2Value = act2Value;
+        Act1Value = act1Value ?? string.Empty;
+        Act2Value = act2Value ?? string.Empty;
         Field = field;
         Difference = difference;
         Severity = severity;
-        DetectedBy = detectedBy.ToHashSet();
+        DetectedBy = detectedBy;
     }
     
     private Discrepancy(int? act1Row, int? act2Row, string act1Value, string act2Value, 
@@ -100,7 +110,7 @@ public record Discrepancy
 
     private static Discrepancy GetWithDifference(CollationRow act1, CollationRow act2)
     {
-        if (act1.Date.Equals(act2.Date) == false)
+        if (act1.Date.Date != act2.Date.Date)
         {
             return new Discrepancy(
                 act1.SerialNumber, 

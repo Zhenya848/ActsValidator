@@ -10,7 +10,7 @@ public record CollationRow : IEquatable<CollationRow>
     public decimal Credit { get; init; } = 0;
 
     public virtual bool Equals(CollationRow? other) =>
-        Debet == other?.Debet && Credit == other.Credit && Date == other.Date;
+        Debet == other?.Debet && Credit == other.Credit && Date.Date == other.Date.Date;
 
     public override int GetHashCode()
     {
