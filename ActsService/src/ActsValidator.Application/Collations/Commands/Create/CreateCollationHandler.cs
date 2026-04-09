@@ -112,7 +112,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
 
     private string GeneratePrompt(IEnumerable<CollationRow> act1, IEnumerable<CollationRow> act2)
     {
-        var act1ToJson = JsonConvert.SerializeObject(act1);
+        /*var act1ToJson = JsonConvert.SerializeObject(act1);
         var act2ToJson = JsonConvert.SerializeObject(act2);
 
         var act1Example = new List<CollationRow>()
@@ -156,6 +156,8 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
                      $"For example: act1 - {act1ExampleToJson} and act2 - {act2ExampleToJson}. " +
                      $"Discrepancies - {discrepanciesExampleToJson}";
         
-        return prompt;
+        return prompt;*/
+        
+        return "";
     }
 }

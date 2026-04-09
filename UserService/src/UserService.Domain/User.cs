@@ -1,12 +1,14 @@
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Identity;
 using UserService.Domain.Shared;
+using UserService.Domain.ValueObjects;
 
 namespace UserService.Domain;
 
 public class User : IdentityUser<Guid>
 {
     public string DisplayName { get; private set; }
+    public UserAccess UserAccess { get; private set; }
 
     public UnitResult<ErrorList> Update(string userName, string email)
     {

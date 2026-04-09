@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Presentation", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Infrastructure", "src\UserService.Infrastructure\UserService.Infrastructure.csproj", "{B37505E8-A553-40A9-829B-73F3658058B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentMessaging.Contracts", "src\PaymentMessaging.Contracts\PaymentMessaging.Contracts.csproj", "{981C752E-DE77-4E1C-919A-EBB7645C8F10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{B37505E8-A553-40A9-829B-73F3658058B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B37505E8-A553-40A9-829B-73F3658058B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B37505E8-A553-40A9-829B-73F3658058B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

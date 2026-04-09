@@ -28,8 +28,4 @@
       <ProjectReference Include="..\UserService.Presentation\UserService.Presentation.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="etc\" />
-    </ItemGroup>
-
 </Project>

@@ -1,4 +1,4 @@
-namespace PaymentService.Models.Shared.ValueObjects;
+namespace UserService.Domain.Shared;
 
 public record ProductData
 {

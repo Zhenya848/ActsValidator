@@ -65,6 +65,7 @@ public class ExcelProvider : IFileProvider
                 var date = ReturnDate(currentRow.Cell(headers[Constants.DiscrepancyFields.Date]));
                 var debet = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Debet]));
                 var credit = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Credit]));
+                var document = currentRow.Cell(headers[Constants.DiscrepancyFields.Document]).Value.ToString() ?? "";
             
                 if (date is null)
                     continue;
@@ -76,7 +77,7 @@ public class ExcelProvider : IFileProvider
                 
                 (debet, credit) = (Math.Abs(debet), Math.Abs(credit));
             
-                var collationRowResult = CollationRow.Create(i, date.Value, debet, credit);
+                var collationRowResult = CollationRow.Create(i, date.Value, debet, credit, document);
             
                 if (collationRowResult.IsFailure)
                     return collationRowResult.Error;
@@ -122,9 +123,6 @@ public class ExcelProvider : IFileProvider
     {
         var value = cell.Value.ToString();
 
-        if (decimal.TryParse(value, out var decimalValue) == false)
-            return 0;
-        
-        return decimalValue;
+        return decimal.TryParse(value, out var decimalValue) == false ? 0 : decimalValue;
     }
 }

@@ -61,11 +61,6 @@ public record Discrepancy
                 "discrepancy.create.failure", 
                 "Unable to create discrepancies because only 1 or 0 act can be null");
         
-        if (act1 != null && act1.Equals(act2))
-            return (ErrorList)Error.Failure(
-                "discrepancy.create.failure", 
-                "Unable to create discrepancies because act1 and act2 have common rows");
-        
         if (act1 is null || act2 is null)
             return new Discrepancy(
                 act1?.SerialNumber, 
@@ -120,6 +115,19 @@ public record Discrepancy
                 Constants.DiscrepancyFields.Date, 
                 GetDateDifference(act1.Date, act2.Date),
                 GetSeverity(act1.Date, act2.Date, (x, y) => (x - y).TotalMinutes));
+        }
+
+        if (act1.DocumentNumber != null && act2.DocumentNumber != null
+                                        && act1.DocumentNumber.Value != act2.DocumentNumber.Value)
+        {
+            return new Discrepancy(
+                act1.SerialNumber,
+                act2.SerialNumber,
+                act1.DocumentNumber.Value.ToString(CultureInfo.InvariantCulture),
+                act2.DocumentNumber.Value.ToString(CultureInfo.InvariantCulture),
+                Constants.DiscrepancyFields.Document,
+                "разные номера документов!",
+                Constants.DiscrepancySeverity.High);
         }
 
         return act1.Debet.Equals(act2.Credit) == false

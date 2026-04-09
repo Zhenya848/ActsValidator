@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService", "PaymentService\PaymentService.csproj", "{2518662E-A502-461E-8775-362EC5899178}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentMessaging.Contracts", "PaymentMessaging.Contracts\PaymentMessaging.Contracts.csproj", "{62FF0A97-249E-4CFB-B32C-ED728D51AEFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{2518662E-A502-461E-8775-362EC5899178}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2518662E-A502-461E-8775-362EC5899178}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2518662E-A502-461E-8775-362EC5899178}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62FF0A97-249E-4CFB-B32C-ED728D51AEFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62FF0A97-249E-4CFB-B32C-ED728D51AEFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62FF0A97-249E-4CFB-B32C-ED728D51AEFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62FF0A97-249E-4CFB-B32C-ED728D51AEFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
