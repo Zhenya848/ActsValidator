@@ -14,6 +14,5 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasKey(i => i.Id);
         
         builder.Property(p => p.Price).IsRequired();
-        builder.Property(p => p.Pack).IsRequired();
     }
 }

@@ -50,7 +50,7 @@ public class CreatePayment
             return ApiExtensions.ToIResultResponse(Error.NotFound("product.not.found", $"product {request.ProductId} not found"));
         
         var paymentSessionResult = PaymentSession
-            .Create(PaymentSessionId.AddNewId(), userId.Value, product.Id);
+            .Create(PaymentSessionId.AddNewId(), userId.Value, product.Id, DateTime.UtcNow);
         
         if (paymentSessionResult.IsFailure)
             return ApiExtensions.ToIResultResponse(paymentSessionResult.Error);
@@ -59,7 +59,7 @@ public class CreatePayment
         
         using var transaction = await unitOfWork.BeginTransaction(cancellationToken);
 
-        dbContext.PaymentSessions.Add(paymentSession);
+        var createResult = dbContext.PaymentSessions.Add(paymentSession);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         try
@@ -80,7 +80,7 @@ public class CreatePayment
                 },
                 Metadata = new Dictionary<string, string>()
                 {
-                    {"paymentSessionId", paymentSession.Id.Value.ToString()}
+                    {"paymentSessionId", createResult.Entity.Id.ToString()}
                 },
                 Capture = true
             };

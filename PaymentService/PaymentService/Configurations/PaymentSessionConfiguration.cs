@@ -16,5 +16,8 @@ public class PaymentSessionConfiguration : IEntityTypeConfiguration<PaymentSessi
         
         builder.Property(ui => ui.UserId).IsRequired();
         builder.HasOne(p => p.Product).WithMany().HasForeignKey(i => i.ProductId);
+        
+        builder.Property(s => s.Status).IsRequired().HasConversion<string>();
+        builder.Property(s => s.CreatedAt).IsRequired();
     }
 }

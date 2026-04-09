@@ -112,34 +112,52 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
 
     private string GeneratePrompt(IEnumerable<CollationRow> act1, IEnumerable<CollationRow> act2)
     {
-        var act1ToJson = JsonConvert.SerializeObject(act1);
+        /*var act1ToJson = JsonConvert.SerializeObject(act1);
         var act2ToJson = JsonConvert.SerializeObject(act2);
 
-        var collation1Example = CollationRow
-            .Create(1, DateTime.UtcNow, (decimal)1451.65, 0).Value;
+        var act1Example = new List<CollationRow>()
+        {
+            CollationRow.Create(11, DateTime.UtcNow.AddMonths(-1), 1521, 0).Value,
+            CollationRow.Create(12, DateTime.UtcNow.AddMonths(-4).AddDays(-3), (decimal)1976.4, 0).Value,
+            CollationRow.Create(13, DateTime.UtcNow.AddMonths(-5).AddDays(-9), 1000, 0).Value,
+            CollationRow.Create(14, DateTime.UtcNow.AddMonths(-4).AddDays(-2), (decimal)1100.6, 0).Value,
+            CollationRow.Create(15, DateTime.UtcNow.AddMonths(-5).AddDays(-11), 0, 860).Value,
+            CollationRow.Create(16, DateTime.UtcNow.AddMonths(-5).AddDays(-13), 0, 1500).Value
+        };
         
-        var collation2Example = CollationRow
-            .Create(8, DateTime.UtcNow, 0, (decimal)7457.5).Value;
-        
-        var collation3Example = CollationRow
-            .Create(5, DateTime.UtcNow - TimeSpan.FromDays(5), 8749, 0).Value;
-        
-        var collation4Example = CollationRow
-            .Create(10, DateTime.UtcNow - TimeSpan.FromDays(10), 0, 8749).Value;
+        var act2Example = new List<CollationRow>()
+        {
+            CollationRow.Create(20, DateTime.UtcNow.AddMonths(-5).AddDays(-9), 0, (decimal)997.6).Value,
+            CollationRow.Create(21, DateTime.UtcNow.AddMonths(-5).AddDays(-10), 0, 1000).Value,
+            CollationRow.Create(22, DateTime.UtcNow.AddMonths(-2), 0, 1521).Value,
+            CollationRow.Create(23, DateTime.UtcNow.AddMonths(-4).AddDays(-3), 0, (decimal)1976.4).Value,
+            CollationRow.Create(24, DateTime.UtcNow.AddMonths(-4).AddDays(-2), 0, (decimal)6000.4).Value
+        };
 
         var discrepanciesExample = new List<Discrepancy>()
         {
-            Discrepancy.Create(collation1Example, collation2Example).Value,
-            Discrepancy.Create(collation3Example, collation4Example).Value
+            Discrepancy.Create(act1Example[0], act2Example[2]).Value,
+            Discrepancy.Create(act1Example[2], act2Example[0]).Value,
+            Discrepancy.Create(null, act2Example[1]).Value,
+            Discrepancy.Create(act1Example[3], act2Example[4]).Value,
+            Discrepancy.Create(act1Example[4], null).Value,
+            Discrepancy.Create(act1Example[5], null).Value
         };
         
+        discrepanciesExample.ForEach(d => d.AddDetectedCharacter(Constants.DetectedBy.Ai));
+        
+        var act1ExampleToJson = JsonConvert.SerializeObject(act1Example);
+        var act2ExampleToJson = JsonConvert.SerializeObject(act2Example);
         var discrepanciesExampleToJson = JsonConvert.SerializeObject(discrepanciesExample);
         
         var prompt = $"I have two reconciliation statements with debit, credit and date: " +
                      $"{act1ToJson} and {act2ToJson}. You are an accountant and " +
                      $"I need you to find the discrepancies and send them in JSON format. " +
-                     $"For example: {discrepanciesExampleToJson}";
+                     $"For example: act1 - {act1ExampleToJson} and act2 - {act2ExampleToJson}. " +
+                     $"Discrepancies - {discrepanciesExampleToJson}";
         
-        return prompt;
+        return prompt;*/
+        
+        return "";
     }
 }

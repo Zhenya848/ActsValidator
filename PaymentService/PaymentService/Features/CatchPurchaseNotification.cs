@@ -5,6 +5,7 @@ using Core.Events;
 using Framework.Extensions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using PaymentMessaging.Contracts.Messaging;
 using PaymentService.Abstractions;
 using PaymentService.DbContexts;
 using PaymentService.Extensions;
@@ -41,7 +42,7 @@ public class CatchPurchaseNotification
                 return Errors.General.ValueIsRequired("paymentSessionId").ToIResultResponse();
 
             if (Guid.TryParse(paymentSessionIdStr, out var paymentSessionId) == false)
-                return Errors.General.ValueIsInvalid("userId").ToIResultResponse();
+                return Errors.General.ValueIsInvalid("paymentSessionId").ToIResultResponse();
 
             var paymentSession = await dbContext.PaymentSessions
                 .Include(p => p.Product)
@@ -55,11 +56,7 @@ public class CatchPurchaseNotification
             if (amount != paymentSession.Product.Price)
                 return Error.Conflict("amount.not.match", "Сумма заказа и цена продукта не сходятся").ToIResultResponse();
 
-            var userBoughtEvent = new UserBoughtTheProductEvent()
-            {
-                UserId = paymentSession.UserId,
-                Pack = paymentSession.Product.Pack
-            };
+            var userBoughtEvent = new ProductWasBoughtEvent(paymentSession.UserId, paymentSession.Product.Id);
 
             var outboxMessage = new OutboxMessage(
                 OutboxMessageId.AddNewId(),
@@ -68,7 +65,7 @@ public class CatchPurchaseNotification
                 DateTime.UtcNow);
             
             dbContext.OutboxMessages.Add(outboxMessage);
-            dbContext.PaymentSessions.Remove(paymentSession);
+            paymentSession.Pending();
             
             await unitOfWork.SaveChanges(cancellationToken);
             

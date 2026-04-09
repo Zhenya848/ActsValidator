@@ -21,7 +21,7 @@ public class ProductsSeeder(
                        ?? throw new ApplicationException("Product Config is missing");
 
         var productsResults = seedData.Select(p =>
-            Product.Create(p.ProductId, p.Price, p.Pack))
+            Product.Create(p.ProductId, p.Price))
             .ToArray();
 
         if (productsResults.Any(p => p.IsFailure))
@@ -32,21 +32,8 @@ public class ProductsSeeder(
             throw new ApplicationException($"Seeding {nameof(ProductData)} was failed");
         }
 
-        var productsDict = productsResults.Select(p => p.Value).ToDictionary(p => p.Id);
-        var existProducts = await dbContext.Products.ToListAsync();
-        
-        foreach (var existProduct in existProducts)
-        {
-            if (productsDict.TryGetValue(existProduct.Id, out var product) == false)
-                dbContext.Products.Remove(existProduct);
-            else
-            {
-                existProduct.Update(product.Price, product.Pack);
-                productsDict.Remove(existProduct.Id);   
-            }
-        }
-        
-        dbContext.Products.AddRange(productsDict.Values);
+        dbContext.Products.AttachRange(productsResults.Select(x => x.Value));
+
         await unitOfWork.SaveChanges();
     }
 }
