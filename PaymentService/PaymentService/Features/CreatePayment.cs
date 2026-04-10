@@ -1,18 +1,16 @@
-using Application.Abstractions;
-using Core;
-using Framework;
-using Framework.Extensions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PaymentService.Abstractions;
 using PaymentService.DbContexts;
+using PaymentService.Extensions;
 using PaymentService.Models;
+using PaymentService.Models.Shared;
 using PaymentService.Models.Shared.ValueObjects.Id;
 using PaymentService.Options;
 using Yandex.Checkout.V3;
-using ApiExtensions = PaymentService.Extensions.ApiExtensions;
-using Error = Core.Error;
+using Error = PaymentService.Models.Shared.Error;
+
 
 namespace PaymentService.Features;
 
@@ -43,17 +41,22 @@ public class CreatePayment
         if (userId is null)
             return Results.Unauthorized();
         
+        var userEmailVerified = httpContextAccessor.HttpContext?.User.GetUserEmailVerified();
+
+        if (bool.TryParse(userEmailVerified, out bool userEmailVerifiedResult) && userEmailVerifiedResult == false)
+            return Errors.User.NotVerified().ToIResultResponse();
+        
         var product = await dbContext.Products
             .FirstOrDefaultAsync(i => i.Id == request.ProductId, cancellationToken);
 
         if (product is null)
-            return ApiExtensions.ToIResultResponse(Error.NotFound("product.not.found", $"product {request.ProductId} not found"));
+            return Error.NotFound("product.not.found", $"product {request.ProductId} not found").ToIResultResponse();
         
         var paymentSessionResult = PaymentSession
             .Create(PaymentSessionId.AddNewId(), userId.Value, product.Id, DateTime.UtcNow);
         
         if (paymentSessionResult.IsFailure)
-            return ApiExtensions.ToIResultResponse(paymentSessionResult.Error);
+            return paymentSessionResult.Error.ToIResultResponse();
         
         var paymentSession = paymentSessionResult.Value;
         
@@ -80,7 +83,7 @@ public class CreatePayment
                 },
                 Metadata = new Dictionary<string, string>()
                 {
-                    {"paymentSessionId", createResult.Entity.Id.ToString()}
+                    {"paymentSessionId", createResult.Entity.Id.Value.ToString()}
                 },
                 Capture = true
             };
@@ -100,7 +103,7 @@ public class CreatePayment
             logger.LogError("Ошибка при создании платежа: " + ex.Message);
             transaction.Rollback();
 
-            return ApiExtensions.ToIResultResponse(Error.Failure("payment.is.failure", "Произошла ошибка при создании платежа"));
+            return Error.Failure("payment.is.failure", "Произошла ошибка при создании платежа").ToIResultResponse();
         }
     }
 }

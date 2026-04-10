@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ActsValidator.Presentation";
+
+package greet;
+
+service Greeter {
+  rpc MakeAction (MakeActionRequest) returns (MakeActionResponse);
+}
+
+message MakeActionRequest {
+  string user_id = 1;
+}
+
+message MakeActionResponse {
+
+}

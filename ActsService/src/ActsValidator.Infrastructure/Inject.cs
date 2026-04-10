@@ -70,9 +70,6 @@ public static class Inject
             };
         });
         
-        services.Configure<MessageBrokerOptions>(
-            configuration.GetSection(MessageBrokerOptions.MessageBroker));
-        
         services.AddMassTransit(configure =>
         {
             configure.SetKebabCaseEndpointNameFormatter();

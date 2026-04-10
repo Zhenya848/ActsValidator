@@ -2,6 +2,7 @@ using CSharpFunctionalExtensions;
 using UserService.Application.Abstractions;
 using UserService.Application.Repositories;
 using UserService.Domain.Shared;
+using UserService.Domain.ValueObjects;
 
 namespace UserService.Application.Commands.RefreshToken;
 
@@ -46,7 +47,9 @@ public class RefreshTokenHandler : ICommandHandler<Guid, Result<LoginUserRespons
             Email = oldRefreshSession.Value.User.Email!,
             UserName = oldRefreshSession.Value.User.Email!,
             DisplayName = oldRefreshSession.Value.User.DisplayName,
-            EmailVerified = oldRefreshSession.Value.User.EmailConfirmed
+            EmailVerified = oldRefreshSession.Value.User.EmailConfirmed,
+            Balance = oldRefreshSession.Value.User.UserAccess.TokenBalance,
+            IsSubscribed = oldRefreshSession.Value.User.UserAccess.IsSubscribed
         };
 
         return new LoginUserResponse(accessToken.AccessToken, newRefreshToken, userData);

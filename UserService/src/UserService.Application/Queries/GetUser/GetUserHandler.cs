@@ -29,7 +29,10 @@ public class GetUserHandler : IQueryHandler<Guid, Result<UserInfo, ErrorList>>
                     u.user_name AS UserName,
                     u.display_name AS DisplayName,
                     u.email AS Email,
-                    u.email_confirmed AS EmailVerified
+                    u.email_confirmed AS EmailVerified,
+                    u.user_access_token_balance AS Balance,
+                    (u.user_access_subscription_expire_at IS NOT NULL 
+                    AND u.user_access_subscription_expire_at > (NOW() AT TIME ZONE 'UTC')) AS IsSubscribed
                 FROM refresh_sessions rs
                 JOIN users u ON rs.user_id = u.id
                 WHERE rs.refresh_token = @RefreshToken

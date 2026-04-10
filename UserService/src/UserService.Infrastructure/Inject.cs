@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using UserService.Application.Repositories;
 using UserService.Domain;
 using UserService.Domain.Shared;
 using UserService.Infrastructure.Authorization;
+using UserService.Infrastructure.Consumers;
 using UserService.Infrastructure.DbContexts;
 using UserService.Infrastructure.Repositories;
 using UserService.Presentation.Options;
@@ -62,6 +64,37 @@ public static class Inject
 
             options.TokenValidationParameters = TokenValidationParametersFactory
                 .CreateWithLifeTime(key);
+        });
+        
+        services.AddMassTransit(configure =>
+        {
+            configure.SetKebabCaseEndpointNameFormatter();
+            configure.AddConsumer<ProductWasBoughtConsumer>();
+            
+            var options = configuration.GetSection(MessageBrokerOptions.MessageBroker).Get<MessageBrokerOptions>()
+                          ?? throw new ApplicationException("Missing RabbitMQ configuration");
+            
+            configure.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(new Uri(options.Host),h =>
+                {
+                    h.Username(options.Username);
+                    h.Password(options.Password);
+                });
+                
+                cfg.ConfigureEndpoints(context);
+                
+                cfg.ReceiveEndpoint(e =>
+                {
+                    e.ConfigureConsumer<ProductWasBoughtConsumer>(context);
+                    
+                    e.UseMessageRetry(r => 
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                        r.Exponential(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10));
+                    });
+                });
+            });
         });
         
         services.AddScoped<IEmailSender, EmailSender>();

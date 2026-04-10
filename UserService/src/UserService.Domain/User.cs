@@ -7,8 +7,8 @@ namespace UserService.Domain;
 
 public class User : IdentityUser<Guid>
 {
-    public string DisplayName { get; private set; }
-    public UserAccess UserAccess { get; private set; }
+    public string DisplayName { get; private set; } = string.Empty;
+    public UserAccess UserAccess { get; } = new();
 
     public UnitResult<ErrorList> Update(string userName, string email)
     {

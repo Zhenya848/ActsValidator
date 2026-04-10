@@ -1,5 +1,3 @@
-using Core;
-using Framework;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService.Models.Shared;
 

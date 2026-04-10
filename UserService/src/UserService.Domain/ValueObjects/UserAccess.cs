@@ -5,10 +5,15 @@ namespace UserService.Domain.ValueObjects;
 
 public record UserAccess
 {
-    public int TokenBalance { get; private set; } = 0;
-    public SubscriptionStatus SubscriptionStatus { get; private set; } = SubscriptionStatus.Inactive;
+    public int TokenBalance { get; private set; } = UserConstants.TRIAL_USER_BALANSE;
     public DateTime? SubscriptionExpireAt { get; set; }
+    public bool IsSubscribed => SubscriptionExpireAt is not null && SubscriptionExpireAt > DateTime.UtcNow;
 
+    public UserAccess()
+    {
+        
+    }
+    
     public void TopUpBalance(int amount) =>
         TokenBalance += amount;
 
@@ -31,11 +36,9 @@ public record UserAccess
             SubscriptionExpireAt = SubscriptionExpireAt.Value.AddMonths(months);
         else 
             SubscriptionExpireAt = DateTime.UtcNow.AddMonths(months);
-            
-        SubscriptionStatus = SubscriptionStatus.Active;
         
         return Result.Success<ErrorList>();
     }
 
-    public void Unsubscribe() => SubscriptionStatus = SubscriptionStatus.Inactive;
+    public void Unsubscribe() => SubscriptionExpireAt = null;
 }

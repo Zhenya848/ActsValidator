@@ -1,15 +1,13 @@
 using System.Text.Json;
-using Application.Abstractions;
-using Core;
-using Core.Events;
-using Framework.Extensions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using PaymentMessaging.Contracts.Messaging;
 using PaymentService.Abstractions;
 using PaymentService.DbContexts;
 using PaymentService.Extensions;
+using PaymentService.Models.Shared;
 using PaymentService.Models.Shared.ValueObjects.Id;
+using PaymentService.Models.ValueObjects;
 using PaymentService.Models.YandexKassa;
 using PaymentService.Outbox;
 
@@ -43,12 +41,16 @@ public class CatchPurchaseNotification
 
             if (Guid.TryParse(paymentSessionIdStr, out var paymentSessionId) == false)
                 return Errors.General.ValueIsInvalid("paymentSessionId").ToIResultResponse();
+            
+            await dbContext.Database.ExecuteSqlAsync(
+                $"SELECT Status FROM payment_sessions WHERE Id = {paymentSessionId} FOR UPDATE NOWAIT",  
+                cancellationToken);
 
             var paymentSession = await dbContext.PaymentSessions
                 .Include(p => p.Product)
                 .FirstOrDefaultAsync(i => i.Id == paymentSessionId, cancellationToken);
             
-            if (paymentSession is null)
+            if (paymentSession is null || paymentSession.Status != PaymentSessionStatus.Created)
                 return Errors.General.NotFound(paymentSessionId).ToIResultResponse();
             
             var amount = int.Parse(paymentDataRequest.Amount.Value.Split('.')[0]);
@@ -60,7 +62,7 @@ public class CatchPurchaseNotification
 
             var outboxMessage = new OutboxMessage(
                 OutboxMessageId.AddNewId(),
-                userBoughtEvent.GetType().FullName!,
+                typeof(ProductWasBoughtEvent).AssemblyQualifiedName!,
                 JsonSerializer.Serialize(userBoughtEvent),
                 DateTime.UtcNow);
             
