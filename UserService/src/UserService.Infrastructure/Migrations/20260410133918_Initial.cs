@@ -32,6 +32,8 @@ namespace UserService.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     display_name = table.Column<string>(type: "text", nullable: false),
+                    user_access_subscription_expire_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    user_access_token_balance = table.Column<int>(type: "integer", nullable: false),
                     user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),

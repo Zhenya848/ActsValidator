@@ -1,5 +1,3 @@
-using Core;
-using Framework;
 using PaymentService.Models.Shared;
 
 namespace PaymentService.Middleware;

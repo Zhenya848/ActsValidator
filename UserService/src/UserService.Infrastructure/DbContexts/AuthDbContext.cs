@@ -30,6 +30,13 @@ public class AuthDbContext(IConfiguration configuration) : IdentityDbContext<Use
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
         modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles");
+
+        modelBuilder.Entity<User>().ComplexProperty(u => u.UserAccess, ub =>
+        {
+            ub.Property(t => t.TokenBalance).IsRequired();
+            ub.Property(se => se.SubscriptionExpireAt).IsRequired(false);
+            ub.Ignore(s => s.IsSubscribed);
+        });
     }
     
     private ILoggerFactory CreateLoggerFactory() =>

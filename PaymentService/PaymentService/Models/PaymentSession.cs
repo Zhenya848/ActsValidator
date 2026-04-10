@@ -1,12 +1,12 @@
-using Core;
 using CSharpFunctionalExtensions;
 using PaymentService.Models.Shared;
 using PaymentService.Models.Shared.ValueObjects.Id;
 using PaymentService.Models.ValueObjects;
+using PaymentService.Models.Shared;
 
 namespace PaymentService.Models;
 
-public class PaymentSession : Core.Entity<PaymentSessionId>
+public class PaymentSession : Shared.Entity<PaymentSessionId>
 {
     public Guid UserId { get; init; }
     

@@ -1,10 +1,9 @@
-using Core;
 using CSharpFunctionalExtensions;
 using PaymentService.Models.Shared;
 
 namespace PaymentService.Models;
 
-public class Product : Core.Entity<string>
+public class Product : Shared.Entity<string>
 {
     public int Price { get; private set; }
     

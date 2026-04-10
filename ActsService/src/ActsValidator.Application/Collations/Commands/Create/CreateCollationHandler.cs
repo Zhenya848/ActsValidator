@@ -22,19 +22,22 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
     private readonly IFileProvider _fileProvider;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<CreateCollationHandler> _logger;
+    private readonly IGreeterService _greeterService;
 
     public CreateCollationHandler(
         IUnitOfWork unitOfWork, 
         IAppRepository appRepository,
         IFileProvider fileProvider,
         IPublishEndpoint publishEndpoint,
-        ILogger<CreateCollationHandler> logger)
+        ILogger<CreateCollationHandler> logger,
+        IGreeterService greeterService)
     {
         _unitOfWork = unitOfWork;
         _appRepository = appRepository;
         _fileProvider = fileProvider;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
+        _greeterService = greeterService;
     }
 
     public async Task<Result<CollationDto, ErrorList>> Handle(
@@ -74,6 +77,14 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
             await _unitOfWork.SaveChanges(cancellationToken);
 
             var result = GetResult(collationResult.Value, aiRequest.Status);
+
+            var makeActionResult = await _greeterService.MakeAction(command.UserId, cancellationToken);
+
+            if (makeActionResult.IsFailure)
+            {
+                transaction.Rollback();
+                return makeActionResult.Error;
+            }
             
             transaction.Commit();
 

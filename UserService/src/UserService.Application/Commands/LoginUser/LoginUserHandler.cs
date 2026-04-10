@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.ValueObjects;
 using LoginUserResponse = UserService.Application.Models.LoginUserResponse;
 
 namespace UserService.Application.Commands.LoginUser;
@@ -42,7 +43,9 @@ public class LoginUserHandler : ICommandHandler<LoginUserCommand, Result<LoginUs
             Email = user.Email!,
             UserName = user.Email!,
             DisplayName = user.DisplayName,
-            EmailVerified = user.EmailConfirmed
+            EmailVerified = user.EmailConfirmed,
+            Balance = user.UserAccess.TokenBalance,
+            IsSubscribed = user.UserAccess.IsSubscribed
         };
         
         return new LoginUserResponse(accessToken.AccessToken, refreshToken, userData);

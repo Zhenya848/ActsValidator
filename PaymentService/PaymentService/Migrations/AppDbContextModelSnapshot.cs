@@ -28,10 +28,19 @@ namespace PaymentService.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("ProductId")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("product_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -51,10 +60,6 @@ namespace PaymentService.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text")
                         .HasColumnName("id");
-
-                    b.Property<int>("Pack")
-                        .HasColumnType("integer")
-                        .HasColumnName("pack");
 
                     b.Property<int>("Price")
                         .HasColumnType("integer")

@@ -1,5 +1,4 @@
 using System.Data;
-using Application.Abstractions;
 using Microsoft.EntityFrameworkCore.Storage;
 using PaymentService.Abstractions;
 using PaymentService.DbContexts;

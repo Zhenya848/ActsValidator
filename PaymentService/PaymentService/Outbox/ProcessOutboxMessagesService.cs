@@ -72,7 +72,7 @@ public class ProcessOutboxMessagesService
     {
         try
         {
-            var type = Type.GetType($"{message.Type}, Core")
+            var type = Type.GetType(message.Type)
                 ?? throw new Exception($"Could not find type {message.Type}");
             
             var deserializedMessage = JsonSerializer.Deserialize(message.Payload, type)

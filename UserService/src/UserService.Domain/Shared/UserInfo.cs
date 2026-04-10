@@ -9,4 +9,7 @@ public record UserInfo()
     
     public string Email { get; set; }
     public bool EmailVerified { get; set; }
+    
+    public int Balance { get; set; }
+    public bool IsSubscribed { get; set; }
 }

@@ -1,3 +1,6 @@
+using ActsValidator.Application.Abstractions;
+using ActsValidator.Presentation.Grpc.Interceptors;
+using ActsValidator.Presentation.Grpc.Services;
 using ActsValidator.Presentation.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +14,20 @@ public static class Inject
         IConfiguration config)
     {
         services.Configure<AuthOptions>(config.GetSection(AuthOptions.Auth));
+        services.Configure<MessageBrokerOptions>(config.GetSection(MessageBrokerOptions.MessageBroker));
         
         services.AddOptions<AuthOptions>();
+        services.AddOptions<MessageBrokerOptions>();
+        
+        services.AddSingleton<ProvideSecretKeyInterceptor>();
+        
+        services.AddGrpcClient<Greeter.GreeterClient>(options =>
+        {
+            options.Address = new Uri("http://localhost:5171");
+        })
+        .AddInterceptor<ProvideSecretKeyInterceptor>();
+        
+        services.AddScoped<IGreeterService, GreeterService>();
         
         return services;
     }
