@@ -14,10 +14,8 @@ public static class Inject
         IConfiguration config)
     {
         services.Configure<AuthOptions>(config.GetSection(AuthOptions.Auth));
-        services.Configure<MessageBrokerOptions>(config.GetSection(MessageBrokerOptions.MessageBroker));
         
         services.AddOptions<AuthOptions>();
-        services.AddOptions<MessageBrokerOptions>();
         
         services.AddSingleton<ProvideSecretKeyInterceptor>();
         

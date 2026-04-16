@@ -1,11 +1,5 @@
-﻿using System.Text;
-using System.Text.Json;
-using ActsValidator.Application.Abstractions;
-using ActsValidator.Application.Extensions;
-using ActsValidator.Application.Repositories;
+﻿using ActsValidator.Application.Abstractions;
 using ActsValidator.Domain.Shared.ValueObjects.Dtos;
-using ActsValidator.Domain.ValueObjects;
-using CSharpFunctionalExtensions;
 using Dapper;
 using Microsoft.Extensions.Logging;
 
@@ -46,10 +40,8 @@ public class GetCollationsWithPaginationHandler : IQueryHandler<GetCollationsWit
                     c.rows_processed as RowsProcessed,
                     c.collation_errors as CollationErrors,
                     c.status as Status,
-                    c.created_at as CreatedAt,
-                    a.Status as AiRequestStatus
+                    c.created_at as CreatedAt
                 FROM collations c
-                JOIN ai_requests a ON a.collation_id = c.id
                 WHERE c.user_id = @UserId{statusFilterSql}
                 AND (@ActName IS NULL OR c.act1name ILIKE '%' || @ActName || '%' OR c.act2name ILIKE '%' || @ActName || '%')
                 ORDER BY c.created_at
@@ -77,13 +69,23 @@ public class GetCollationsWithPaginationHandler : IQueryHandler<GetCollationsWit
             var totalCount = await connection.ExecuteScalarAsync<int>(
                 countSql, 
                 isStatusFilter ? new { query.UserId, statusFilter } : new { query.UserId });
+
+            var averageAccuracySql = $"SELECT ROUND(a.coincidences_count * 2.0 / NULLIF(a.rows_processed, 0) * 100, 1) " +
+                                     $"FROM collations a WHERE user_id = @UserId " +
+                                     $"AND a.rows_processed - a.coincidences_count * 2 > 0";
+            var averageAccuracy = (await connection.QueryAsync<float>(
+                averageAccuracySql,
+                new { query.UserId }
+            )).ToArray();
             
             return new PagedList<CollationDto>()
             {
                 Items = items.ToList(),
                 Page = query.Page,
                 PageSize = query.PageSize,
-                TotalCount = totalCount
+                TotalCount = totalCount,
+                SuccessfulCollations = totalCount - averageAccuracy.Length,
+                AverageAccuracy = averageAccuracy.Sum()
             };
         }
         catch (Exception e)

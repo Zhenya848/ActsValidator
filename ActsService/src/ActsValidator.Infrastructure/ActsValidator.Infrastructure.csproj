@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ActsValidator.Application\ActsValidator.Application.csproj" />
-      <ProjectReference Include="..\AiMessaging.Contracts\AiMessaging.Contracts.csproj" />
       <ProjectReference Include="..\ActsValidator.Domain\ActsValidator.Domain.csproj" />
       <ProjectReference Include="..\ActsValidator.Presentation\ActsValidator.Presentation.csproj" />
     </ItemGroup>

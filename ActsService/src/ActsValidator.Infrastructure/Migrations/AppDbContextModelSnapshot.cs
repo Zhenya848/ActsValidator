@@ -22,35 +22,6 @@ namespace ActsValidator.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ActsValidator.Domain.AiRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("text")
-                        .HasColumnName("error_message");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<Guid>("collation_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("collation_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_ai_requests");
-
-                    b.HasIndex("collation_id")
-                        .IsUnique()
-                        .HasDatabaseName("ix_ai_requests_collation_id");
-
-                    b.ToTable("ai_requests", (string)null);
-                });
-
             modelBuilder.Entity("ActsValidator.Domain.Collation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -96,18 +67,6 @@ namespace ActsValidator.Infrastructure.Migrations
                         .HasName("pk_collations");
 
                     b.ToTable("collations", (string)null);
-                });
-
-            modelBuilder.Entity("ActsValidator.Domain.AiRequest", b =>
-                {
-                    b.HasOne("ActsValidator.Domain.Collation", "Collation")
-                        .WithOne()
-                        .HasForeignKey("ActsValidator.Domain.AiRequest", "collation_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_ai_requests_collations_collation_id");
-
-                    b.Navigation("Collation");
                 });
 #pragma warning restore 612, 618
         }

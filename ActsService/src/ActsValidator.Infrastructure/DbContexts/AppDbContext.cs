@@ -9,8 +9,6 @@ public class AppDbContext(IConfiguration configuration) : DbContext
 {
     public DbSet<Collation> Collations => Set<Collation>();
     
-    public DbSet<AiRequest> AiRequests => Set<AiRequest>();
-    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));

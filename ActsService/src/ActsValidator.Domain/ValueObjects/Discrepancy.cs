@@ -16,7 +16,6 @@ public record Discrepancy
     public string Difference { get; init; }
     public string Field { get; init; }
     public string Severity { get; init; }
-    public HashSet<string> DetectedBy { get; init; } = [];
     
     public virtual bool Equals(Discrepancy? other) =>
         Act1Row == other?.Act1Row && Act2Row == other?.Act2Row && Act1Value == other?.Act1Value 
@@ -29,19 +28,6 @@ public record Discrepancy
     }
 
     [JsonConstructor]
-    private Discrepancy(int? act1Row, int? act2Row, string? act1Value, string? act2Value, 
-        string field, string difference, string severity, HashSet<string> detectedBy)
-    {
-        Act1Row = act1Row;
-        Act2Row = act2Row;
-        Act1Value = act1Value ?? string.Empty;
-        Act2Value = act2Value ?? string.Empty;
-        Field = field;
-        Difference = difference;
-        Severity = severity;
-        DetectedBy = detectedBy;
-    }
-    
     private Discrepancy(int? act1Row, int? act2Row, string act1Value, string act2Value, 
         string field, string difference, string severity)
     {
@@ -187,16 +173,5 @@ public record Discrepancy
             < 10000 => Constants.DiscrepancySeverity.Medium,
             _ => Constants.DiscrepancySeverity.High
         };
-    }
-
-    public UnitResult<ErrorList> AddDetectedCharacter(params IEnumerable<string> detectedCharacters)
-    {
-        foreach (var detectedCharacter in detectedCharacters)
-        {
-            if (DetectedBy.Add(detectedCharacter) == false)
-                return (ErrorList)Errors.General.ValueIsInvalid(nameof(detectedCharacter));
-        }
-
-        return Result.Success<ErrorList>();
     }
 }

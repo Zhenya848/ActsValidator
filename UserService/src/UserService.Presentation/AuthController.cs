@@ -1,10 +1,12 @@
 using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UserService.Application.Commands.ForgotPassword;
 using UserService.Application.Commands.LoginUser;
 using UserService.Application.Commands.LogoutUser;
 using UserService.Application.Commands.RefreshToken;
 using UserService.Application.Commands.RegisterUser;
+using UserService.Application.Commands.ResetPassword;
 using UserService.Application.Commands.SendVerificationCode;
 using UserService.Application.Commands.UpdateUser;
 using UserService.Application.Commands.VerifyEmail;
@@ -140,7 +142,7 @@ public class AuthController : ControllerBase
     {
         var userId = User.GetUserIdRequired();
         var command = new UpdateUserCommand(
-            userId, request.UserName, request.Email, request.Password, request.OldPassword);
+            userId, request.UserName, request.Email, request.Password, request.NewPassword);
         
         var result = await handler.Handle(command, cancellationToken);
         
@@ -165,11 +167,36 @@ public class AuthController : ControllerBase
         
         return Ok(Envelope.Ok(null));
     }
-
-    [Authorize]
-    [HttpGet("say-hello")]
-    public async Task<IActionResult> SayHello()
+    
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        [FromServices] ForgotPasswordHandler handler,
+        CancellationToken cancellationToken = default)
     {
-        return Ok(Envelope.Ok("Hello"));
+        var result = await handler.Handle(request.Email, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
+    }
+    
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+        [FromQuery] Guid userId,
+        [FromQuery] string token,
+        [FromBody] ResetPasswordRequest request,
+        [FromServices] ResetPasswordHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new ResetPasswordCommand(userId, token, request.NewPassword);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
     }
 }
