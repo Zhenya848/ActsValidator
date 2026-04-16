@@ -13,12 +13,6 @@ public static class Constants
         public static readonly string[] RequiredCells = [Date, Credit, Debet, Document];
     }
 
-    public static class DetectedBy
-    {
-        public const string Algorythm = "algorithm";
-        public const string Ai = "ai";
-    }
-
     public static class DiscrepancySeverity
     {
         public const string Low = "low";

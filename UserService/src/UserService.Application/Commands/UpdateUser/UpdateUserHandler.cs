@@ -29,14 +29,14 @@ public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result<Guid,
         if (updateResult.IsFailure)
             return updateResult.Error;
 
-        if (string.IsNullOrWhiteSpace(command.Password) || string.IsNullOrWhiteSpace(command.OldPassword))
+        if (string.IsNullOrWhiteSpace(command.Password) || string.IsNullOrWhiteSpace(command.NewPassword))
         {
             await _userManager.UpdateAsync(userResult);
             return userResult.Id;
         }
         
         var changePasswordResult = await _userManager
-            .ChangePasswordAsync(userResult, command.Password, command.OldPassword);
+            .ChangePasswordAsync(userResult, command.Password, command.NewPassword);
 
         if (changePasswordResult.Succeeded == false)
             return (ErrorList)changePasswordResult.Errors

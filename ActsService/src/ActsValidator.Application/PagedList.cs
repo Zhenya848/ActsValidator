@@ -7,6 +7,8 @@
         public long TotalCount { get; init; }
         public int Page { get; init; }
         public int PageSize { get; init; }
+        public int SuccessfulCollations { get; init; }
+        public float AverageAccuracy { get; init; }
 
         public bool HasNextPage => TotalCount < (Page - 1) * PageSize;
         public bool HasPreviousPage => Page > 1;

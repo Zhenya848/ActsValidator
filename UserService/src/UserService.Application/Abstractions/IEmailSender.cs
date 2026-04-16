@@ -8,4 +8,5 @@ public interface IEmailSender
 {
     Task<UnitResult<ErrorList>> Send(MailData mailData);
     Task<UnitResult<ErrorList>> SendVerificationCode(Guid userId, string confirmationToken, string email);
+    Task<UnitResult<ErrorList>> SendPasswordResetCode(Guid userId, string token, string email);
 }

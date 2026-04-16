@@ -41,6 +41,24 @@ public class EmailSender : IEmailSender
         return Result.Success<ErrorList>();
     }
     
+    public async Task<UnitResult<ErrorList>> SendPasswordResetCode(Guid userId, string token, string email)
+    {
+        var confirmationLink = $"http://localhost:5173/reset-password" +
+                               $"?userId={userId}&token={Base64UrlEncoder.Encode(token)}";
+
+        var subject = "Сброс пароля";
+        var body = $"Для сброса пароля перейдите по ссылке: {confirmationLink}";
+
+        var mailData = new MailData(email, subject, body);
+
+        var sendMessageResult = await Send(mailData);
+        
+        if (sendMessageResult.IsFailure)
+            return sendMessageResult.Error;
+        
+        return Result.Success<ErrorList>();
+    }
+    
     public async Task<UnitResult<ErrorList>> Send(MailData mailData)
     {
         try

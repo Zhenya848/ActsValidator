@@ -13,7 +13,6 @@ public record CollationDto
     public DiscrepancyDto[] CollationErrors { get; init; } = [];
     
     public string Status { get; init; }
-    public string AiRequestStatus { get; init; }
     public DateTime CreatedAt { get; init; }
 
     private CollationDto() { }
@@ -27,7 +26,6 @@ public record CollationDto
         int rowsProcessed,
         DiscrepancyDto[] errors,
         string status,
-        string aiRequestStatus,
         DateTime createdAt)
     {
         Id = id;
@@ -38,7 +36,6 @@ public record CollationDto
         RowsProcessed = rowsProcessed;
         CollationErrors = errors;
         Status = status;
-        AiRequestStatus = aiRequestStatus;
         CreatedAt = createdAt;
     }
 }

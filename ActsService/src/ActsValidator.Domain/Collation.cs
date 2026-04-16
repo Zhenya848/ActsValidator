@@ -90,8 +90,6 @@ public class Collation : Shared.Entity<CollationId>
             
                 if (discrepancyResult.IsFailure)
                     return discrepancyResult.Error;
-
-                discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
                 
                 usedRowsSerialNumbersInAct2.Add(row2BySelector.SerialNumber);
                 totalDiscrepancies.Add(discrepancyResult.Value);
@@ -199,27 +197,11 @@ public class Collation : Shared.Entity<CollationId>
             return new CollationResult(totalDiscrepancies, coincidencesCount);
         
         var discrepancies1 = diff1
-            .Select(x =>
-            {
-                var discrepancyResult = Discrepancy.Create(x, null);
-                
-                if (discrepancyResult.IsSuccess)
-                    discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
-
-                return discrepancyResult;
-            })
+            .Select(x => Discrepancy.Create(x, null))
             .ToArray();
         
         var discrepancies2 = diff2WithNoPair
-            .Select(x =>
-            {
-                var discrepancyResult = Discrepancy.Create(null, x);
-                
-                if (discrepancyResult.IsSuccess)
-                    discrepancyResult.Value.AddDetectedCharacter(Constants.DetectedBy.Algorythm);
-
-                return discrepancyResult;
-            })
+            .Select(x => Discrepancy.Create(null, x))
             .ToArray();
             
         if (discrepancies1.Any(x => x.IsFailure))

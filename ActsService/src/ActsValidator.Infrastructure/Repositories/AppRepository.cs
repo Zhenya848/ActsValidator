@@ -25,12 +25,4 @@ public class AppRepository : IAppRepository
         
         return collation.Id;
     }
-
-    public Guid AddAiRequest(AiRequest aiRequest)
-    {
-        _dbContext.AiRequests.Add(aiRequest);
-        _logger.LogInformation("Added AiRequest {aiRequest} with id {aiRequestId}", aiRequest, aiRequest.Id.Value);
-        
-        return aiRequest.Id;
-    }
 }

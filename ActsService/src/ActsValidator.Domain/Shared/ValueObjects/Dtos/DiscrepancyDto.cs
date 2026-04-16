@@ -10,12 +10,11 @@ public record DiscrepancyDto
     public string Difference { get; init; }
     public string Field { get; init; }
     public string Severity { get; init; }
-    public string[] DetectedBy { get; init; }
     
     private DiscrepancyDto() { }
 
     public DiscrepancyDto(int? act1Row, int? act2Row, 
-        string act1Value, string act2Value, string field, string difference, string severity, string[] detectedBy)
+        string act1Value, string act2Value, string field, string difference, string severity)
     {
         Act1Row = act1Row;
         Act2Row = act2Row;
@@ -24,6 +23,5 @@ public record DiscrepancyDto
         Field = field;
         Difference = difference;
         Severity = severity;
-        DetectedBy = detectedBy;
     }
 }
