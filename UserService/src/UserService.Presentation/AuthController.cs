@@ -14,6 +14,7 @@ using UserService.Application.Queries.GetUser;
 using UserService.Domain.Shared;
 using UserService.Presentation.Extensions;
 using UserService.Presentation.Requests;
+using LoginUserResponse = UserService.Presentation.Responses.LoginUserResponse;
 
 namespace UserService.Presentation;
 
@@ -36,7 +37,7 @@ public class AuthController : ControllerBase
 
         return Ok(Envelope.Ok(result.Value));
     }
-
+    
     [HttpGet("email-verification")]
     public async Task<IActionResult> VerifyEmail(
         [FromQuery] Guid userId,
@@ -68,8 +69,9 @@ public class AuthController : ControllerBase
             return result.Error.ToResponse();
         
         HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
         
-        return Ok(Envelope.Ok(result.Value));
+        return Ok(Envelope.Ok(response));
     }
     
     [HttpPost("logout")]
@@ -110,8 +112,9 @@ public class AuthController : ControllerBase
             return result.Error.ToResponse();
         
         HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
         
-        return Ok(Envelope.Ok(result.Value));
+        return Ok(Envelope.Ok(response));
     }
 
     [HttpGet("get-user")]

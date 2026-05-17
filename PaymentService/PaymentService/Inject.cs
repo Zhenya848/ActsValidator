@@ -28,10 +28,10 @@ public static class Inject
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<RabbitMQOptions>(
-            configuration.GetSection(RabbitMQOptions.RabbitMQ));
+        services.Configure<MessageBrokerOptions>(
+            configuration.GetSection(MessageBrokerOptions.MessageBroker));
 
-        services.AddOptions<RabbitMQOptions>();
+        services.AddOptions<MessageBrokerOptions>();
         
         services.AddHttpContextAccessor();
         
@@ -52,7 +52,7 @@ public static class Inject
         
         services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;  
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
         })
@@ -71,7 +71,7 @@ public static class Inject
 
         services.AddMassTransit(configure =>
         {
-            var options = configuration.GetSection(RabbitMQOptions.RabbitMQ).Get<RabbitMQOptions>()
+            var options = configuration.GetSection(MessageBrokerOptions.MessageBroker).Get<MessageBrokerOptions>()
                           ?? throw new ApplicationException("Missing RabbitMQ configuration");
 
             configure.UsingRabbitMq((context, cfg) =>
@@ -115,10 +115,12 @@ public static class Inject
             .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
             .CreateLogger();
         
+        services.AddSerilog();
+        
         services.AddOpenTelemetry()
             .WithMetrics(c => c
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("SynapzeAI.API"))
-                .AddMeter("SynapzeAI")
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("ActsService.API"))
+                .AddMeter("ActsService")
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()

@@ -29,7 +29,7 @@ public class GreeterService : Greeter.GreeterBase
         if (result.IsFailure)
             throw new RpcException(new Status(
                 StatusCode.FailedPrecondition, 
-                string.Join(", ", result.Error.Select(e => $"{e.Code}: {e.Message}"))
+                $"{result.Error.Code}: {result.Error.Message}"
             ));
 
         return new MakeActionResponse();

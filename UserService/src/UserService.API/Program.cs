@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Serilog;
+using UserService.API.Middleware;
 using UserService.Application;
 using UserService.Domain.Shared.Payment;
 using UserService.Infrastructure;
@@ -15,9 +17,9 @@ builder.Services.AddControllers();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Listen(IPAddress.Any, 5172);
+    options.Listen(IPAddress.Any, 8080);
     
-    options.Listen(IPAddress.Any, 5171, listenOptions =>
+    options.Listen(IPAddress.Any, 8081, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http2;
     });
@@ -67,6 +69,8 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.MapGrpcService<GreeterService>();
 
 if (app.Environment.IsDevelopment())
@@ -75,13 +79,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
+
 app.UseCors(config =>
 {
-    config.WithOrigins("http://localhost:5173")
+    config.WithOrigins("http://localhost")
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod();
 });
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
 app.UseAuthorization();

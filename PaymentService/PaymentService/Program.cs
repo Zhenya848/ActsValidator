@@ -3,6 +3,7 @@ using PaymentService;
 using PaymentService.Extensions;
 using PaymentService.Middleware;
 using PaymentService.Seeding;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,11 +61,13 @@ app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
 
 app.UseCors(config =>
 {
-    config.WithOrigins("http://localhost:5173")
+    config.WithOrigins("http://localhost")
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod();
 });
+
+app.UseSerilogRequestLogging();
 
 app.MapEndpoints();
 

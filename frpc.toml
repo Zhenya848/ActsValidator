@@ -1,0 +1,14 @@
+serverAddr = "31.177.82.204"
+serverPort = 7000
+auth.token = "4bf6b21b-b52b-4ebf-b546-ef31b543708f"
+
+log.to = "console"
+log.level = "debug" 
+
+[[proxies]]
+name = "sverka-web"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 80
+customDomains = ["express-sverka.ru"]
+hostHeaderRewrite = "127.0.0.1"

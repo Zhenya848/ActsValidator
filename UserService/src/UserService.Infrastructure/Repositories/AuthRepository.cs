@@ -16,13 +16,13 @@ public class AuthRepository : IAuthRepository
         _authDbContext = authDbContext;
     }
     
-    public async Task<Result<Guid, Error>> Delete(
+    public Result<Guid, Error> Delete(
         RefreshSession refreshSession, 
         CancellationToken cancellationToken = default)
     {
-        var rowsAffected = await _authDbContext.RefreshSessions
+        var rowsAffected = _authDbContext.RefreshSessions
             .Where(t => t.RefreshToken == refreshSession.RefreshToken)
-            .ExecuteDeleteAsync(cancellationToken);
+            .ExecuteDelete();
 
         if (rowsAffected == 0)
             return Errors.Token.InvalidToken();

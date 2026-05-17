@@ -6,7 +6,7 @@ using UserService.Domain.Shared;
 
 namespace UserService.Application.Commands.UpdateUser;
 
-public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result<Guid, ErrorList>>
+public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result<UserInfo, ErrorList>>
 {
     private readonly UserManager<User> _userManager;
 
@@ -15,7 +15,7 @@ public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result<Guid,
         _userManager = userManager;
     }
     
-    public async Task<Result<Guid, ErrorList>> Handle(
+    public async Task<Result<UserInfo, ErrorList>> Handle(
         UpdateUserCommand command, 
         CancellationToken cancellationToken = default)
     {
@@ -28,21 +28,33 @@ public class UpdateUserHandler : ICommandHandler<UpdateUserCommand, Result<Guid,
         
         if (updateResult.IsFailure)
             return updateResult.Error;
-
+        
+        var result = await _userManager.UpdateAsync(userResult);
+            
+        if (result.Succeeded == false)
+            return (ErrorList)result.Errors.Select(e => Error.Failure(e.Code, e.Description)).ToList();
+        
         if (string.IsNullOrWhiteSpace(command.Password) || string.IsNullOrWhiteSpace(command.NewPassword))
-        {
-            await _userManager.UpdateAsync(userResult);
-            return userResult.Id;
-        }
+            return GetUserInfo(userResult);
         
         var changePasswordResult = await _userManager
             .ChangePasswordAsync(userResult, command.Password, command.NewPassword);
 
         if (changePasswordResult.Succeeded == false)
             return (ErrorList)changePasswordResult.Errors
-                .Select(e => Error.Failure(e.Code, e.Description))
+                .Select(e => Error.Failure("user.wrong.credentials", e.Description))
                 .ToList();
         
-        return userResult.Id;
+        return GetUserInfo(userResult);
     }
+    
+    private UserInfo GetUserInfo(User user) => new()
+    {
+        Id = user.Id,
+        Email = user.Email!,
+        DisplayName = user.DisplayName,
+        EmailVerified = user.EmailConfirmed,
+        Balance = user.UserAccess.TokenBalance,
+        IsSubscribed = user.UserAccess.IsSubscribed
+    };
 }

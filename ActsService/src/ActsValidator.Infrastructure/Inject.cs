@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Security.Cryptography;
 using ActsValidator.Application.Abstractions;
 using ActsValidator.Application.Providers;
@@ -7,11 +8,18 @@ using ActsValidator.Infrastructure.DbContexts;
 using ActsValidator.Infrastructure.Providers;
 using ActsValidator.Infrastructure.Repositories;
 using ActsValidator.Presentation.Options;
-using MassTransit;
+using Elastic.CommonSchema.Serilog;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using Serilog;
+using Serilog.Events;
 
 namespace ActsValidator.Infrastructure;
 
@@ -47,47 +55,39 @@ public static class Inject
 
             options.TokenValidationParameters = TokenValidationParametersFactory
                 .CreateWithLifeTime(key);
-            
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
-                {
-                    var accessToken = context.Request.Query["access_token"];
-                    
-                    if (!string.IsNullOrEmpty(accessToken) && 
-                        context.HttpContext.Request.Path.StartsWithSegments("/analysis-hub"))
-                    {
-                        context.Token = accessToken;
-                    }
-                    return Task.CompletedTask;
-                }
-            };
         });
         
-        services.AddMassTransit(configure =>
-        {
-            configure.SetKebabCaseEndpointNameFormatter();
-            
-            var options = configuration.GetSection(MessageBrokerOptions.MessageBroker).Get<MessageBrokerOptions>()
-                          ?? throw new ApplicationException("Missing Message broker configuration!");
+        string indexFormat =
+            $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM-dd}";
 
-            /*configure.AddEntityFrameworkOutbox<AppDbContext>(o =>
-            {
-                o.UsePostgres();
-                o.UseBusOutbox();
-            });*/
-
-            configure.UsingRabbitMq((context, cfg) =>
-            {
-                cfg.Host(new Uri(options.Host), h =>
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Debug()
+            .WriteTo.Elasticsearch(
+                [new Uri(configuration.GetConnectionString("Elasticsearch") 
+                         ?? throw new ApplicationException("Elasticsearch connection string not found."))],
+                options =>
                 {
-                    h.Username(options.Username);
-                    h.Password(options.Password);
-                });
-                
-                cfg.ConfigureEndpoints(context);
-            });
-        });
+                    options.DataStream = new DataStreamName(indexFormat);
+                    options.TextFormatting = new EcsTextFormatterConfiguration<LogEventEcsDocument>();
+                    options.BootstrapMethod = BootstrapMethod.Silent;
+                })
+            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .CreateLogger();
+        
+        services.AddSerilog();
+        
+        services.AddOpenTelemetry()
+            .WithMetrics(c => c
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("ActsService.API"))
+                .AddMeter("ActsService")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddPrometheusExporter());
         
         return services;
     }

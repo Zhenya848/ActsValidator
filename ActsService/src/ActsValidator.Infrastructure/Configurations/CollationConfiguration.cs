@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ActsValidator.Domain;
+using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects.Ids;
 using ActsValidator.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,8 @@ public class CollationConfiguration : IEntityTypeConfiguration<Collation>
         
         builder.Property(ui => ui.UserId).IsRequired();
 
-        builder.Property(n => n.Act1Name).IsRequired();
-        builder.Property(n => n.Act2Name).IsRequired();
+        builder.Property(n => n.Act1Name).IsRequired().HasMaxLength(Constants.DatabaseConfigurations.MaxLowTextLength);
+        builder.Property(n => n.Act2Name).IsRequired().HasMaxLength(Constants.DatabaseConfigurations.MaxLowTextLength);
         builder.Property(n => n.CoincidencesCount).IsRequired();
         builder.Property(n => n.RowsProcessed).IsRequired();
         builder.Property(n => n.Status).IsRequired().HasConversion<string>();

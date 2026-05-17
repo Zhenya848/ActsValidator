@@ -1,4 +1,4 @@
-namespace UserService.Application.Models;
+namespace UserService.Infrastructure.EmailSender;
 
 public record MailOptions
 {

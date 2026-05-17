@@ -20,7 +20,7 @@ public static class TokenValidationParametersFactory
     {
         return new TokenValidationParameters
         {
-            ValidateLifetime = true,
+            ValidateLifetime = false,
             ValidateIssuer = false,
             ValidateAudience = false,
             IssuerSigningKey = securityKey,

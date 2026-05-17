@@ -5,7 +5,7 @@ public class Errors
     public class General
     {
         public static Error ValueIsInvalid(string? name = null) =>
-            Error.Validation("value.is.invalid", $"{(name != null ? name : "value")} is invalid");
+            Error.Validation("value.is.invalid", $"{(name != null ? name : "value")} is invalid", name ?? null);
 
         public static Error NotFound(Guid? id = null) =>
             Error.NotFound("record.not.found", $"record not found{(id != null ? " for id: " + id : "")}");
@@ -14,7 +14,7 @@ public class Errors
             Error.Failure("failure", $"{(name != null ? name : "value")} is failure");
 
         public static Error ValueIsRequired(string? name = null) =>
-            Error.Conflict("value.is.required", $"{(name != null ? name : "value")} is required");
+            Error.Validation("value.is.required", $"{(name != null ? name : "value")} is required", name ?? null);
     }
     
     public static class User
@@ -23,16 +23,20 @@ public class Errors
             Error.Validation("user.already.exist", "user with this name already exist!");
         
         public static Error NotFound() => 
-            Error.NotFound("user.notfound", "user not found");
+            Error.NotFound("user.not.found", "user not found");
         
-        public static Error NotFound(string username) => 
-            Error.NotFound("user.notfound", $"user with name {username} not found");
+        public static Error NotFound(Guid? id = null) =>
+            Error.NotFound("record.not.found", $"record not found{(id != null ? " for id: " + id : "")}", 
+                id is not null ? id.ToString() : null);
             
         public static Error WrongCredentials() =>
             Error.Validation("user.wrong.credentials", "user with wrong credentials");
         
         public static Error NotVerified() =>
             Error.Validation("user.not.verified", "user email not verified");
+        
+        public static Error InvalidBalance() =>
+            Error.Validation("user.invalid.balance", "user with invalid balance");
     }
     
     public static class Token

@@ -1,8 +1,8 @@
 using CSharpFunctionalExtensions;
 using UserService.Application.Abstractions;
+using UserService.Application.Models;
 using UserService.Application.Repositories;
 using UserService.Domain.Shared;
-using UserService.Domain.ValueObjects;
 
 namespace UserService.Application.Commands.RefreshToken;
 
@@ -30,7 +30,7 @@ public class RefreshTokenHandler : ICommandHandler<Guid, Result<LoginUserRespons
         if (oldRefreshSession.Value.ExpiresIn < DateTime.UtcNow)
             return (ErrorList)Errors.Token.InvalidToken();
         
-        var deleteResult = await _authRepository.Delete(oldRefreshSession.Value, cancellationToken);
+        var deleteResult = _authRepository.Delete(oldRefreshSession.Value, cancellationToken);
 
         if (deleteResult.IsFailure)
             return (ErrorList)deleteResult.Error;
@@ -45,7 +45,6 @@ public class RefreshTokenHandler : ICommandHandler<Guid, Result<LoginUserRespons
         {
             Id = oldRefreshSession.Value.User.Id,
             Email = oldRefreshSession.Value.User.Email!,
-            UserName = oldRefreshSession.Value.User.Email!,
             DisplayName = oldRefreshSession.Value.User.DisplayName,
             EmailVerified = oldRefreshSession.Value.User.EmailConfirmed,
             Balance = oldRefreshSession.Value.User.UserAccess.TokenBalance,

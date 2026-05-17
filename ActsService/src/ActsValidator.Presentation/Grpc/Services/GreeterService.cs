@@ -27,6 +27,11 @@ public class GreeterService : IGreeterService
         }
         catch (RpcException ex)
         {
+            var splitMessage = ex.Status.Detail.Split(": ");
+            
+            if (splitMessage.Length > 1)
+                return (ErrorList)Error.Failure(splitMessage[0], splitMessage[1]);
+            
             return (ErrorList)Error.Failure("subtract.token.failure", ex.Status.Detail);
         }
     }

@@ -68,6 +68,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
             }
             
             transaction.Commit();
+            _logger.LogInformation("Successfully created new collation with id: {id}", collationResult.Value.Id);
 
             return GetResult(collationResult.Value);
         }

@@ -6,7 +6,7 @@ using UserService.Domain.Shared;
 
 namespace UserService.Application.Commands.MakeAction;
 
-public class MakeActionHandler : ICommandHandler<Guid, UnitResult<ErrorList>>
+public class MakeActionHandler : ICommandHandler<Guid, UnitResult<Error>>
 {
     private readonly UserManager<User> _userManager;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,20 +17,23 @@ public class MakeActionHandler : ICommandHandler<Guid, UnitResult<ErrorList>>
         _unitOfWork = unitOfWork;
     }
     
-    public async Task<UnitResult<ErrorList>> Handle(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<UnitResult<Error>> Handle(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
 
         if (user is null)
-            return (ErrorList)Errors.User.NotFound();
+            return Errors.User.NotFound();
+        
+        if (user.UserAccess.IsSubscribed)
+            return Result.Success<Error>();
         
         var debitBalanceResult = user.UserAccess.DebitBalance(1);
         
-        if (user.UserAccess.IsSubscribed == false && debitBalanceResult.IsFailure)
-            return user.UserAccess.IsSubscribed == false ? Errors.User.WrongCredentials() : debitBalanceResult.Error;
+        if (debitBalanceResult.IsFailure)
+            return debitBalanceResult.Error;
 
         await _unitOfWork.SaveChanges(cancellationToken);
         
-        return Result.Success<ErrorList>();
+        return Result.Success<Error>();
     }
 }
