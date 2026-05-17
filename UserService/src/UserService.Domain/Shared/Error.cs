@@ -18,8 +18,8 @@ public class Error
     public static Error Validation(string code, string message, string? invalidField = null) =>
         new Error(code, message, ErrorType.Validation, invalidField);
 
-    public static Error NotFound(string code, string message) =>
-        new Error(code, message, ErrorType.NotFound);
+    public static Error NotFound(string code, string message, string? field = null) =>
+        new Error(code, message, ErrorType.NotFound, field);
 
     public static Error Failure(string code, string message) =>
         new Error(code, message, ErrorType.Failure);

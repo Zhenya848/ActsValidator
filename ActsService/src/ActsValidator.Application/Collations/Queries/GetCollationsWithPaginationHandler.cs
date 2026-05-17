@@ -1,4 +1,5 @@
 ﻿using ActsValidator.Application.Abstractions;
+using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects.Dtos;
 using Dapper;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ public class GetCollationsWithPaginationHandler : IQueryHandler<GetCollationsWit
         {
             using var connection = _connectionFactory.Create();
             
-            var isStatusFilter = query.StatusFilter is not null && query.StatusFilter.ToLower() != "all";
+            var isStatusFilter = query.StatusFilter is not null && query.StatusFilter.ToLower() != Constants.StatusFilter.All;
             var statusFilter = isStatusFilter ? query.StatusFilter!.ToLower() : string.Empty;
             var statusFilterSql = isStatusFilter ? " AND LOWER(c.status) = @statusFilter" : string.Empty;
             
@@ -64,28 +65,26 @@ public class GetCollationsWithPaginationHandler : IQueryHandler<GetCollationsWit
                     Offset = (query.Page - 1) * query.PageSize 
                 }
             );
-            
-            var countSql = $"SELECT COUNT(*) FROM collations c WHERE user_id = @UserId{statusFilterSql}";
-            var totalCount = await connection.ExecuteScalarAsync<int>(
-                countSql, 
-                isStatusFilter ? new { query.UserId, statusFilter } : new { query.UserId });
 
-            var averageAccuracySql = $"SELECT ROUND(a.coincidences_count * 2.0 / NULLIF(a.rows_processed, 0) * 100, 1) " +
-                                     $"FROM collations a WHERE user_id = @UserId " +
-                                     $"AND a.rows_processed - a.coincidences_count * 2 > 0";
-            var averageAccuracy = (await connection.QueryAsync<float>(
-                averageAccuracySql,
-                new { query.UserId }
+            var averageAccuraciesSql = $"SELECT ROUND(c.coincidences_count * 2.0 / NULLIF(c.rows_processed, 0) * 100, 1) " +
+                                     $"FROM collations c WHERE c.user_id = @UserId{statusFilterSql}";
+            var averageAccuracies = (await connection.QueryAsync<float>(
+                averageAccuraciesSql,
+                isStatusFilter ? new { query.UserId, statusFilter } : new { query.UserId }
             )).ToArray();
+            
+            var successfulCollations = averageAccuracies.Count(x => x > 99.9f);
             
             return new PagedList<CollationDto>()
             {
                 Items = items.ToList(),
                 Page = query.Page,
                 PageSize = query.PageSize,
-                TotalCount = totalCount,
-                SuccessfulCollations = totalCount - averageAccuracy.Length,
-                AverageAccuracy = averageAccuracy.Sum()
+                TotalCount = averageAccuracies.Length,
+                SuccessfulCollations = successfulCollations,
+                AverageAccuracy = averageAccuracies.Length > 0 
+                    ? MathF.Round(averageAccuracies.Sum() / averageAccuracies.Length * 10) / 10 
+                    : 0
             };
         }
         catch (Exception e)

@@ -43,7 +43,7 @@ public class CatchPurchaseNotification
                 return Errors.General.ValueIsInvalid("paymentSessionId").ToIResultResponse();
             
             await dbContext.Database.ExecuteSqlAsync(
-                $"SELECT Status FROM payment_sessions WHERE Id = {paymentSessionId} FOR UPDATE NOWAIT",  
+                $"SELECT * FROM payment_sessions WHERE Id = {paymentSessionId} FOR UPDATE NOWAIT",  
                 cancellationToken);
 
             var paymentSession = await dbContext.PaymentSessions
@@ -58,7 +58,8 @@ public class CatchPurchaseNotification
             if (amount != paymentSession.Product.Price)
                 return Error.Conflict("amount.not.match", "Сумма заказа и цена продукта не сходятся").ToIResultResponse();
 
-            var userBoughtEvent = new ProductWasBoughtEvent(paymentSession.UserId, paymentSession.Product.Id);
+            var userBoughtEvent = new ProductWasBoughtEvent(
+                Guid.NewGuid(), paymentSession.UserId, paymentSession.Product.Id);
 
             var outboxMessage = new OutboxMessage(
                 OutboxMessageId.AddNewId(),

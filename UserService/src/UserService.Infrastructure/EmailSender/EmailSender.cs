@@ -1,16 +1,13 @@
-using System.Data;
 using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using UserService.Application.Abstractions;
-using UserService.Application.Commands.RegisterUser;
-using UserService.Application.Models;
 using UserService.Domain.Shared;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
-namespace UserService.Infrastructure;
+namespace UserService.Infrastructure.EmailSender;
 
 public class EmailSender : IEmailSender
 {
@@ -25,7 +22,7 @@ public class EmailSender : IEmailSender
 
     public async Task<UnitResult<ErrorList>> SendVerificationCode(Guid userId, string confirmationToken, string email)
     {
-        var confirmationLink = $"http://localhost:5173/email-verified" +
+        var confirmationLink = $"https://express-sverka.ru/email-verified" +
                                $"?userId={userId}&token={Base64UrlEncoder.Encode(confirmationToken)}";
 
         var subject = "Подтверждение регистрации";
@@ -43,7 +40,7 @@ public class EmailSender : IEmailSender
     
     public async Task<UnitResult<ErrorList>> SendPasswordResetCode(Guid userId, string token, string email)
     {
-        var confirmationLink = $"http://localhost:5173/reset-password" +
+        var confirmationLink = $"https://express-sverka.ru/reset-password" +
                                $"?userId={userId}&token={Base64UrlEncoder.Encode(token)}";
 
         var subject = "Сброс пароля";
@@ -59,7 +56,7 @@ public class EmailSender : IEmailSender
         return Result.Success<ErrorList>();
     }
     
-    public async Task<UnitResult<ErrorList>> Send(MailData mailData)
+    private async Task<UnitResult<ErrorList>> Send(MailData mailData)
     {
         try
         {
@@ -70,7 +67,7 @@ public class EmailSender : IEmailSender
             var tryParse = MailboxAddress.TryParse(mailData.To, out var to);
 
             if (tryParse == false)
-                return (ErrorList)Errors.General.Failure("Email");
+                return (ErrorList)Errors.General.ValueIsInvalid("Email");
 
             mail.To.Add(to);
 

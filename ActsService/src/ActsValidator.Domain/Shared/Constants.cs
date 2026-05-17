@@ -13,10 +13,21 @@ public static class Constants
         public static readonly string[] RequiredCells = [Date, Credit, Debet, Document];
     }
 
+    public static class DatabaseConfigurations
+    {
+        public const int MaxHighTextLength = 1000;
+        public const int MaxLowTextLength = 100;
+    }
+
     public static class DiscrepancySeverity
     {
         public const string Low = "low";
         public const string Medium = "medium";
         public const string High = "high";
+    }
+    
+    public static class StatusFilter
+    {
+        public const string All = "all";
     }
 }

@@ -4,6 +4,7 @@ using ActsValidator.Infrastructure;
 using ActsValidator.Presentation;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
+
 app.UseCors(config =>
 {
     config.WithOrigins("http://localhost:5173")
@@ -60,6 +63,8 @@ app.UseCors(config =>
         .AllowAnyHeader()
         .AllowAnyMethod();
 });
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
 app.UseAuthorization();

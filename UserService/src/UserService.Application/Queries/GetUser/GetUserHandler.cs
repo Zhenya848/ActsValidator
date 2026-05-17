@@ -26,7 +26,6 @@ public class GetUserHandler : IQueryHandler<Guid, Result<UserInfo, ErrorList>>
             var sql = $@"
                 SELECT 
                     u.id AS Id,
-                    u.user_name AS UserName,
                     u.display_name AS DisplayName,
                     u.email AS Email,
                     u.email_confirmed AS EmailVerified,

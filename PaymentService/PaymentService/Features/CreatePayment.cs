@@ -79,7 +79,7 @@ public class CreatePayment
                 Confirmation = new Confirmation
                 {
                     Type = ConfirmationType.Redirect,
-                    ReturnUrl = "https://synapzeai.ru/tests"
+                    ReturnUrl = "https://express-sverka.ru/"
                 },
                 Metadata = new Dictionary<string, string>()
                 {

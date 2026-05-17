@@ -38,8 +38,8 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
         if (string.IsNullOrWhiteSpace(command.UserName))
             errors.Add(Errors.General.ValueIsRequired(nameof(command.UserName)));
         
-        if (string.IsNullOrWhiteSpace(command.Email))
-            errors.Add(Errors.General.ValueIsRequired(nameof(command.Email)));
+        if (command.Email.IsEmailValid() == false)
+            errors.Add(Errors.General.ValueIsInvalid(nameof(command.Email)));
         
         if (string.IsNullOrWhiteSpace(command.Password))
             errors.Add(Errors.General.ValueIsRequired(nameof(command.Password)));

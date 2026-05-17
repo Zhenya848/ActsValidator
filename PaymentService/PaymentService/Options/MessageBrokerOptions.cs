@@ -1,8 +1,8 @@
 namespace PaymentService.Options;
 
-public record RabbitMQOptions
+public record MessageBrokerOptions
 {
-    public const string RabbitMQ = "RabbitMQ";
+    public const string MessageBroker = "MessageBroker";
     
     public string Host { get; init; }
     public string Username { get; init; }

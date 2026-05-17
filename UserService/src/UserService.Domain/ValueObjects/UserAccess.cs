@@ -17,28 +17,26 @@ public record UserAccess
     public void TopUpBalance(int amount) =>
         TokenBalance += amount;
 
-    public UnitResult<ErrorList> DebitBalance(int amount)
+    public UnitResult<Error> DebitBalance(int amount)
     {
         if (TokenBalance < amount)
-            return (ErrorList)Errors.General.ValueIsInvalid(nameof(amount));
+            return Errors.User.InvalidBalance();
         
         TokenBalance -= amount;
         
-        return Result.Success<ErrorList>();
+        return Result.Success<Error>();
     }
     
-    public UnitResult<ErrorList> Subscribe(int months)
+    public UnitResult<Error> Subscribe(int months)
     {
         if (months < 1)
-            return (ErrorList)Errors.General.ValueIsInvalid(nameof(months));
+            return Errors.General.ValueIsInvalid(nameof(months));
         
         if (SubscriptionExpireAt is not null && SubscriptionExpireAt.Value > DateTime.UtcNow)
             SubscriptionExpireAt = SubscriptionExpireAt.Value.AddMonths(months);
         else 
             SubscriptionExpireAt = DateTime.UtcNow.AddMonths(months);
         
-        return Result.Success<ErrorList>();
+        return Result.Success<Error>();
     }
-
-    public void Unsubscribe() => SubscriptionExpireAt = null;
 }

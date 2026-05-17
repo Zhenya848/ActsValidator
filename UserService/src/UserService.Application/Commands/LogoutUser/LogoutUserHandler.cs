@@ -8,10 +8,12 @@ namespace UserService.Application.Commands.LogoutUser;
 public class LogoutUserHandler : ICommandHandler<Guid, UnitResult<ErrorList>>
 {
     private readonly IAuthRepository _authRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public LogoutUserHandler(IAuthRepository authRepository)
+    public LogoutUserHandler(IAuthRepository authRepository, IUnitOfWork unitOfWork)
     {
         _authRepository = authRepository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task<UnitResult<ErrorList>> Handle(Guid refreshToken, CancellationToken cancellationToken = default)
@@ -22,7 +24,8 @@ public class LogoutUserHandler : ICommandHandler<Guid, UnitResult<ErrorList>>
         if (oldRefreshSession.IsFailure)
             return (ErrorList)oldRefreshSession.Error;
         
-        await _authRepository.Delete(oldRefreshSession.Value, cancellationToken);
+        _authRepository.Delete(oldRefreshSession.Value, cancellationToken);
+        await _unitOfWork.SaveChanges(cancellationToken);
 
         return Result.Success<ErrorList>();
     }

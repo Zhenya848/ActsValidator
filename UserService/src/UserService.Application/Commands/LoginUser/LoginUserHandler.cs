@@ -41,7 +41,6 @@ public class LoginUserHandler : ICommandHandler<LoginUserCommand, Result<LoginUs
         {
             Id = user.Id,
             Email = user.Email!,
-            UserName = user.Email!,
             DisplayName = user.DisplayName,
             EmailVerified = user.EmailConfirmed,
             Balance = user.UserAccess.TokenBalance,

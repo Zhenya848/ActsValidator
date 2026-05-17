@@ -13,7 +13,7 @@ using UserService.Infrastructure.DbContexts;
 namespace UserService.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260410133918_Initial")]
+    [Migration("20260417234505_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -154,6 +154,23 @@ namespace UserService.Infrastructure.Migrations
                         .HasName("pk_user_tokens");
 
                     b.ToTable("user_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_processed_events");
+
+                    b.ToTable("processed_events", (string)null);
                 });
 
             modelBuilder.Entity("UserService.Domain.RefreshSession", b =>

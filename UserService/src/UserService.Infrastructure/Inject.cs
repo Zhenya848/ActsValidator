@@ -1,9 +1,18 @@
+using System.Reflection;
+using Elastic.CommonSchema.Serilog;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using Serilog;
+using Serilog.Events;
 using UserService.Application.Abstractions;
 using UserService.Application.Models;
 using UserService.Application.Repositories;
@@ -12,6 +21,7 @@ using UserService.Domain.Shared;
 using UserService.Infrastructure.Authorization;
 using UserService.Infrastructure.Consumers;
 using UserService.Infrastructure.DbContexts;
+using UserService.Infrastructure.EmailSender;
 using UserService.Infrastructure.Repositories;
 using UserService.Presentation.Options;
 
@@ -82,9 +92,7 @@ public static class Inject
                     h.Password(options.Password);
                 });
                 
-                cfg.ConfigureEndpoints(context);
-                
-                cfg.ReceiveEndpoint(e =>
+                cfg.ReceiveEndpoint("product-was-bought", e =>
                 {
                     e.ConfigureConsumer<ProductWasBoughtConsumer>(context);
                     
@@ -97,7 +105,39 @@ public static class Inject
             });
         });
         
-        services.AddScoped<IEmailSender, EmailSender>();
+        string indexFormat =
+            $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM-dd}";
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Debug()
+            .WriteTo.Elasticsearch(
+                [new Uri(configuration.GetConnectionString("Elasticsearch") 
+                         ?? throw new ApplicationException("Elasticsearch connection string not found."))],
+                options =>
+                {
+                    options.DataStream = new DataStreamName(indexFormat);
+                    options.TextFormatting = new EcsTextFormatterConfiguration<LogEventEcsDocument>();
+                    options.BootstrapMethod = BootstrapMethod.Silent;
+                })
+            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .CreateLogger();
+        
+        services.AddSerilog();
+        
+        services.AddOpenTelemetry()
+            .WithMetrics(c => c
+                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("ActsService.API"))
+                .AddMeter("ActsService")
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddPrometheusExporter());
+        
+        services.AddScoped<IEmailSender, EmailSender.EmailSender>();
         
         return services;
     }

@@ -9,7 +9,7 @@ namespace ActsValidator.Infrastructure.Providers;
 
 public class ExcelProvider : IFileProvider
 {
-    private Result<Dictionary<string, int>, ErrorList> GetHeaders(IXLWorksheet worksheet)
+    private Result<Dictionary<string, IXLAddress>, ErrorList> GetHeaders(IXLWorksheet worksheet)
     {
         var searchRange = worksheet.Range(1, 1, 20, 20);
         
@@ -17,20 +17,20 @@ public class ExcelProvider : IFileProvider
             .Select(name => new
             {
                 Name = name,
-                Cell = searchRange.CellsUsed(c => c.Value.ToString().Trim().ToLower() == name)
+                Cell = searchRange.CellsUsed(c => c.Value.ToString().Trim().ToLower().Contains(name))
                     .FirstOrDefault()
             })
             .ToList();
         
         var errors = results
             .Where(x => x.Cell == null)
-            .Select(x => Error.NotFound("header.not.found", $"Header {x.Name} is not found"))
+            .Select(x => Error.NotFound("header.not.found", $"Header {x.Name} is not found", x.Name))
             .ToList();
 
         if (errors.Count > 0)
             return (ErrorList)errors;
 
-        return results.ToDictionary(x => x.Name, x => x.Cell!.Address.ColumnNumber);
+        return results.ToDictionary(x => x.Name, x => x.Cell!.Address);
     }
 
     public Result<IEnumerable<CollationRow>, ErrorList> GetCollationRows(Stream file, bool reverse = false)
@@ -52,20 +52,21 @@ public class ExcelProvider : IFileProvider
         
             var results = new List<CollationRow>();
         
-            var startIndex = worksheet.CellsUsed(c => 
-                    Constants.DiscrepancyFields.RequiredCells.Contains(c.Value.ToString().Trim().ToLower()))
-                .First()
-                .Address
-                .RowNumber;
+            var startIndex = headersResult.Value.First().Value.RowNumber;
+
+            var dateColumnNumber = headers[Constants.DiscrepancyFields.Date].ColumnNumber;
+            var debetColumnNumber = headers[Constants.DiscrepancyFields.Debet].ColumnNumber;
+            var creditColumnNumber = headers[Constants.DiscrepancyFields.Credit].ColumnNumber;
+            var documentColumnNumber = headers[Constants.DiscrepancyFields.Document].ColumnNumber;
 
             for (int i = startIndex + 1; i < worksheet.LastRowUsed()!.RowNumber(); i++)
             {
                 var currentRow = worksheet.Row(i);
             
-                var date = ReturnDate(currentRow.Cell(headers[Constants.DiscrepancyFields.Date]));
-                var debet = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Debet]));
-                var credit = ReturnDecimal(currentRow.Cell(headers[Constants.DiscrepancyFields.Credit]));
-                var document = currentRow.Cell(headers[Constants.DiscrepancyFields.Document]).Value.ToString() ?? "";
+                var date = ReturnDate(currentRow.Cell(dateColumnNumber));
+                var debet = ReturnDecimal(currentRow.Cell(debetColumnNumber));
+                var credit = ReturnDecimal(currentRow.Cell(creditColumnNumber));
+                var document = currentRow.Cell(documentColumnNumber).Value.ToString() ?? "";
             
                 if (date is null)
                     continue;
@@ -121,7 +122,7 @@ public class ExcelProvider : IFileProvider
 
     private decimal ReturnDecimal(IXLCell cell)
     {
-        var value = cell.Value.ToString();
+        var value = cell.Value.ToString().Trim();
 
         return decimal.TryParse(value, out var decimalValue) == false ? 0 : decimalValue;
     }

@@ -13,11 +13,12 @@ public class User : IdentityUser<Guid>
     public UnitResult<ErrorList> Update(string userName, string email)
     {
         var errors = new List<Error>();
+        email = email.Trim().ToLower();
 
         if (string.IsNullOrWhiteSpace(userName))
-            errors.Add(Errors.General.ValueIsInvalid(nameof(userName)));
+            errors.Add(Errors.General.ValueIsRequired(nameof(userName)));
         
-        if (string.IsNullOrWhiteSpace(email))
+        if (email.IsEmailValid() == false)
             errors.Add(Errors.General.ValueIsInvalid(nameof(email)));
         
         if (errors.Count > 0)

@@ -153,6 +153,23 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("UserService.Domain.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_processed_events");
+
+                    b.ToTable("processed_events", (string)null);
+                });
+
             modelBuilder.Entity("UserService.Domain.RefreshSession", b =>
                 {
                     b.Property<Guid>("Id")

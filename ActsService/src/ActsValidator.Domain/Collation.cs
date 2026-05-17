@@ -47,7 +47,7 @@ public class Collation : Shared.Entity<CollationId>
         Status = collationErrors.Count switch
         {
             < 1 => CollationStatus.Success,
-            < 10 => CollationStatus.Warning,
+            <= 3 => CollationStatus.Warning,
             _ => CollationStatus.Error
         };
         
@@ -57,8 +57,8 @@ public class Collation : Shared.Entity<CollationId>
     record CollationValueDictionary(int SerialNumber, int Count);
     
     private static Result<CollationResult, ErrorList> Compare(
-        List<CollationRow> act1,
-        List<CollationRow> reversedAct2)
+        IEnumerable<CollationRow> act1,
+        IEnumerable<CollationRow> reversedAct2)
     {
         UnitResult<ErrorList> MakePairsBy(
             Func<CollationRow, object?> selector,
@@ -100,35 +100,21 @@ public class Collation : Shared.Entity<CollationId>
             return Result.Success<ErrorList>();
         }
 
-        act1 = act1.GroupBy(x => x.DocumentNumber).Select(x =>
-        {
-            var serialNumber = x.First().SerialNumber;
-            var date = x.First().Date;
-            var debet = x.Sum(y => y.Debet);
-            var credit = x.Sum(y => y.Credit);
-            
-            if (debet != 0 && credit != 0)
+        List<CollationRow> GroupByDocumentNumber(IEnumerable<CollationRow> act) =>
+            act.GroupBy(x => x.DocumentNumber).Select(x =>
+            {
+                var serialNumber = x.First().SerialNumber;
+                var date = x.First().Date;
+                var debet = x.Sum(y => y.Debet);
+                var credit = x.Sum(y => y.Credit);
+                
                 return debet >= credit 
                     ? CollationRow.Create(serialNumber, date, debet - credit, 0, x.Key).Value
                     : CollationRow.Create(serialNumber, date, 0, credit - debet, x.Key).Value;
+            }).ToList();
 
-            return CollationRow.Create(serialNumber, date, debet, credit, x.Key).Value;
-        }).ToList();
-        
-        reversedAct2 = reversedAct2.GroupBy(x => x.DocumentNumber).Select(x =>
-        {
-            var serialNumber = x.First().SerialNumber;
-            var date = x.First().Date;
-            var debet = x.Sum(y => y.Debet);
-            var credit = x.Sum(y => y.Credit);
-            
-            if (debet != 0 && credit != 0)
-                return debet >= credit 
-                    ? CollationRow.Create(serialNumber, date, debet - credit, 0, x.Key).Value
-                    : CollationRow.Create(serialNumber, date, 0, credit - debet, x.Key).Value;
-
-            return CollationRow.Create(serialNumber, date, debet, credit, x.Key).Value;
-        }).ToList();
+        act1 = GroupByDocumentNumber(act1);
+        reversedAct2 = GroupByDocumentNumber(reversedAct2);
         
         var counts1 = act1.GroupBy(x => x)
             .ToDictionary(g => g.Key, g => g.Count());
@@ -168,7 +154,7 @@ public class Collation : Shared.Entity<CollationId>
         }
         
         var totalDiscrepancies = new HashSet<Discrepancy>();
-        var coincidencesCount = (act1.Count + reversedAct2.Count - diff1.Count - diff2.Count) / 2;
+        var coincidencesCount = (act1.Count() + reversedAct2.Count() - diff1.Count - diff2.Count) / 2;
         var usedRowsSerialNumbersInAct2 = new HashSet<int>();
 
         var pairsByDocumentNumberResult = MakePairsBy(x => x.DocumentNumber, diff1, diff2, totalDiscrepancies, 
@@ -228,16 +214,13 @@ public class Collation : Shared.Entity<CollationId>
     {
         var errors = new List<Error>();
         
-        var act1List = act1.ToList();
-        var act2List = reversedAct2.ToList();
-        
         if (string.IsNullOrWhiteSpace(act1Name))
             errors.Add(Errors.General.ValueIsRequired(nameof(act1Name)));
         
         if (string.IsNullOrWhiteSpace(act2Name))
             errors.Add(Errors.General.ValueIsRequired(nameof(act2Name)));
         
-        var collationResult = Compare(act1List, act2List);
+        var collationResult = Compare(act1, reversedAct2);
         
         if (collationResult.IsFailure) 
             errors.AddRange(collationResult.Error);
@@ -251,7 +234,7 @@ public class Collation : Shared.Entity<CollationId>
             act1Name, 
             act2Name, 
             collationResult.Value.CoincidencesCount, 
-            act1List.Count + act2List.Count,
+            act1.Count() + reversedAct2.Count(),
             collationResult.Value.Errors, 
             DateTime.UtcNow);
     }

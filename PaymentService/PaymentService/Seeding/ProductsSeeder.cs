@@ -25,8 +25,8 @@ public class ProductsSeeder(
 
         if (productsResults.Any(p => p.IsFailure))
         {
-            logger.LogError($"Seeding {nameof(ProductData)} failed. Errors: " +
-                            $"{productsResults.Select(e => e.Error.Message)}");
+            logger.LogError($"Seeding {nameof(ProductData)} failed. " +
+                            $"{string.Join(", ", productsResults.Select(e => $"{e.Error.Code}: {e.Error.Message}"))}");
             
             throw new ApplicationException($"Seeding {nameof(ProductData)} was failed");
         }
