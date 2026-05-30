@@ -48,7 +48,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
             return file2Cells.Error;
         
         var collationResult = Collation
-            .Create(command.UserId, command.Act1Name, command.Act2Name, file1Cells.Value, file2Cells.Value);
+            .Create(command.UserId, command.Act1Name, command.Act2Name, file1Cells.Value.ToList(), file2Cells.Value.ToList());
         
         if (collationResult.IsFailure)
             return collationResult.Error;
