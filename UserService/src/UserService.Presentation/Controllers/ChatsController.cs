@@ -20,7 +20,7 @@ namespace UserService.Presentation;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class ChatsController : ControllerBase
 {
     [HttpPost("registration")]
     public async Task<IActionResult> Register(
