@@ -17,8 +17,8 @@ namespace ActsValidator.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    act1name = table.Column<string>(type: "text", nullable: false),
-                    act2name = table.Column<string>(type: "text", nullable: false),
+                    act1name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    act2name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     coincidences_count = table.Column<int>(type: "integer", nullable: false),
                     rows_processed = table.Column<int>(type: "integer", nullable: false),
                     collation_errors = table.Column<string>(type: "jsonb", nullable: true),

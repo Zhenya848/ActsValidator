@@ -1,14 +1,14 @@
 [
   {
     "productId": "5_collations",
-    "price": 290
+    "price": 150
   },
   {
     "productId": "subscribe_1_month", 
-    "price": 490
+    "price": 390
   },
   {
-    "productId": "subscribe_12_month",
-    "price": 4900
+    "productId": "subscribe_3_month",
+    "price": 1090
   }
 ]

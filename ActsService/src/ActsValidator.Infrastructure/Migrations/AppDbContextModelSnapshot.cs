@@ -30,12 +30,14 @@ namespace ActsValidator.Infrastructure.Migrations
 
                     b.Property<string>("Act1Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("act1name");
 
                     b.Property<string>("Act2Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("act2name");
 
                     b.Property<int>("CoincidencesCount")
