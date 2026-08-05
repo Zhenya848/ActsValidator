@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 
 namespace UserService.Application.Commands.SendVerificationCode;
 

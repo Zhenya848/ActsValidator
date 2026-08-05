@@ -1,0 +1,205 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UserService.Application.Commands.ForgotPassword;
+using UserService.Application.Commands.LoginUser;
+using UserService.Application.Commands.LogoutUser;
+using UserService.Application.Commands.RefreshToken;
+using UserService.Application.Commands.RegisterUser;
+using UserService.Application.Commands.ResetPassword;
+using UserService.Application.Commands.SendVerificationCode;
+using UserService.Application.Commands.UpdateUser;
+using UserService.Application.Commands.VerifyEmail;
+using UserService.Application.Queries.GetUser;
+using UserService.Domain.Shared;
+using UserService.Presentation.Authorization;
+using UserService.Presentation.Extensions;
+using UserService.Presentation.Requests;
+using LoginUserResponse = UserService.Presentation.Responses.LoginUserResponse;
+
+namespace UserService.Presentation.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    [HttpPost("registration")]
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterUserRequest request,
+        [FromServices] RegisterUserHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new RegisterUserCommand(request.UserName, request.Email, request.Password);
+        
+        var result = await handler.Handle(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+
+        return Ok(Envelope.Ok(result.Value));
+    }
+    
+    [HttpGet("email-verification")]
+    public async Task<IActionResult> VerifyEmail(
+        [FromQuery] Guid userId,
+        [FromQuery] string token,
+        [FromServices] VerifyEmailHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new VerifyEmailCommand(userId, token);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginUserRequest request,
+        [FromServices] LoginUserHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new LoginUserCommand(request.Email, request.Password);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
+        
+        return Ok(Envelope.Ok(response));
+    }
+    
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(
+        [FromServices] LogoutUserHandler handler, 
+        CancellationToken cancellationToken = default)
+    {
+        if (HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken) == false)
+            return BadRequest("Refresh token was missing!");
+
+        if (Guid.TryParse(refreshToken, out var refreshTokenGuid) == false)
+            return Errors.Token.InvalidToken().ToResponse();
+        
+        var result = await handler.Handle(refreshTokenGuid, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        HttpContext.Response.Cookies.Delete("refreshToken");
+        
+        return Ok();
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(
+        [FromServices] RefreshTokenHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        if (HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken) == false)
+            return Unauthorized();
+        
+        if (Guid.TryParse(refreshToken, out var refreshTokenGuid) == false)
+            return Errors.Token.InvalidToken().ToResponse();
+        
+        var result = await handler.Handle(refreshTokenGuid, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
+        
+        return Ok(Envelope.Ok(response));
+    }
+
+    [HttpGet("get-user")]
+    public async Task<IActionResult> GetUser(
+        [FromServices] GetUserHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        if (HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken) == false)
+            return Unauthorized();
+        
+        if (Guid.TryParse(refreshToken, out var refreshTokenGuid) == false)
+            return Errors.Token.InvalidToken().ToResponse();
+        
+        var result = await handler.Handle(refreshTokenGuid, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(result.Value));
+    }
+
+    [Permission("user.update")]
+    [HttpPut("update-user")]
+    public async Task<IActionResult> UpdateUser(
+        [FromBody] UpdateUserRequest request,
+        [FromServices] UpdateUserHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = User.GetUserIdRequired();
+        var command = new UpdateUserCommand(
+            userId, request.UserName, request.Email, request.Password, request.NewPassword);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(result.Value));
+    }
+
+    [Permission("user.send-verification-code")]
+    [HttpPost("send-verification-code")]
+    public async Task<IActionResult> SendVerificationCode(
+        [FromServices] SendVerificationCodeHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = User.GetUserIdRequired();
+        
+        var result = await handler.Handle(userId, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
+    }
+    
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        [FromServices] ForgotPasswordHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await handler.Handle(request.Email, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
+    }
+    
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+        [FromQuery] Guid userId,
+        [FromQuery] string token,
+        [FromBody] ResetPasswordRequest request,
+        [FromServices] ResetPasswordHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new ResetPasswordCommand(userId, token, request.NewPassword);
+        
+        var result = await handler.Handle(command, cancellationToken);
+        
+        if (result.IsFailure)
+            return result.Error.ToResponse();
+        
+        return Ok(Envelope.Ok(null));
+    }
+}

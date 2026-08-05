@@ -1,4 +1,5 @@
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using UserService.Application.Commands.MakeAction;
 using UserService.Domain;
 

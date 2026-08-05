@@ -8,6 +8,7 @@ using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
 using UserService.Domain.Shared.Payment;
+using UserService.Domain.User;
 using UserService.Infrastructure.DbContexts;
 using static System.String;
 

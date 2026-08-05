@@ -7,6 +7,7 @@ using UserService.Application.Abstractions;
 using UserService.Application.Models;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 using UserService.Infrastructure.DbContexts;
 using UserService.Presentation.Options;
 

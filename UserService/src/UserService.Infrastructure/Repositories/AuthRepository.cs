@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UserService.Application.Repositories;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 using UserService.Infrastructure.DbContexts;
 
 namespace UserService.Infrastructure.Repositories;
@@ -15,7 +16,23 @@ public class AuthRepository : IAuthRepository
     {
         _authDbContext = authDbContext;
     }
-    
+
+    public Guid CreateParticipant(ParticipantAccount participantAccount)
+    {
+        var addResult = _authDbContext.ParticipantAccounts.Add(participantAccount);
+        
+        return addResult.Entity.Id;
+    }
+
+    public Guid DeleteParticipant(Guid userId)
+    {
+        _authDbContext.ParticipantAccounts
+            .Where(u => u.UserId == userId)
+            .ExecuteDelete();
+        
+        return userId;
+    }
+
     public Result<Guid, Error> Delete(
         RefreshSession refreshSession, 
         CancellationToken cancellationToken = default)
