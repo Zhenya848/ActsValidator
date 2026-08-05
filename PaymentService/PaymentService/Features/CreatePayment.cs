@@ -41,9 +41,9 @@ public class CreatePayment
         if (userId is null)
             return Results.Unauthorized();
         
-        var userEmailVerified = httpContextAccessor.HttpContext?.User.GetUserEmailVerified();
+        var userEmailVerified = httpContextAccessor.HttpContext?.User.GetUserEmailVerifiedRequired();
 
-        if (bool.TryParse(userEmailVerified, out bool userEmailVerifiedResult) && userEmailVerifiedResult == false)
+        if (bool.TryParse(userEmailVerified, out var userEmailVerifiedResult) && userEmailVerifiedResult == false)
             return Errors.User.NotVerified().ToIResultResponse();
         
         var product = await dbContext.Products

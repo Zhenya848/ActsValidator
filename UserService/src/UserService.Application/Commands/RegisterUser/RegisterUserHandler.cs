@@ -5,26 +5,34 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Abstractions;
 using UserService.Application.Models;
+using UserService.Application.Repositories;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 
 namespace UserService.Application.Commands.RegisterUser;
 
 public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<Guid, ErrorList>>
 {
     private readonly UserManager<User> _userManager;
+    private readonly RoleManager<Role> _roleManager;
     private readonly IEmailSender _emailSender;
+    private readonly IAuthRepository _authRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterUserHandler> _logger;
     
     public RegisterUserHandler(
         UserManager<User> userManager, 
+        RoleManager<Role> roleManager,
         IEmailSender emailSender, 
+        IAuthRepository authRepository,
         IUnitOfWork unitOfWork, 
         ILogger<RegisterUserHandler> logger)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _emailSender = emailSender;
+        _authRepository = authRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -46,19 +54,22 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
 
         if (errors.Count > 0)
             return (ErrorList)errors;
-
-        var user = new User();
-        var updateResult = user.Update(command.UserName, command.Email);
         
-        if (updateResult.IsFailure)
-            return updateResult.Error;
+        var role = await _roleManager.FindByNameAsync(ParticipantAccount.PARTICIPANT)
+                   ?? throw new ApplicationException($"Role {ParticipantAccount.PARTICIPANT} does not exist");
+        
+        var user = User.CreateParticipant(command.UserName, command.Email, role);
+        var participantAccount = ParticipantAccount.CreateParticipant(user);
 
         var userExist = await _userManager.FindByEmailAsync(command.Email);
 
         if (userExist is not null)
         {
             if (userExist.EmailConfirmed == false)
+            {
                 await _userManager.DeleteAsync(userExist);
+                _authRepository.DeleteParticipant(userExist.Id);
+            }
             else
                 return (ErrorList)Errors.User.AlreadyExist();
         }
@@ -67,8 +78,9 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand, Result<G
 
         try
         {
+            _authRepository.CreateParticipant(participantAccount);
             var result = await _userManager.CreateAsync(user, command.Password);
-
+            
             if (result.Succeeded == false)
             {
                 transaction.Rollback();

@@ -1,0 +1,25 @@
+{
+  "Roles" : {
+    "Participant" : [
+      "user.update",
+      "user.send-verification-code"
+    ],
+    
+    "Admin" : [
+      "user.update",
+      "user.send-verification-code",
+      "chats.get"
+    ]
+  },
+  
+  "Permissions" : {
+    "Chats" : [
+      "chats.get"
+    ],
+    
+    "Users" : [
+      "user.update",
+      "user.send-verification-code"
+    ]
+  }
+}

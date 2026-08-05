@@ -7,7 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\PaymentMessaging.Contracts\PaymentMessaging.Contracts.csproj" />
       <ProjectReference Include="..\UserService.Application\UserService.Application.csproj" />
+      <ProjectReference Include="..\UserService.Contracts\UserService.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

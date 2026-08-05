@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentMessaging.Contracts", "src\PaymentMessaging.Contracts\PaymentMessaging.Contracts.csproj", "{981C752E-DE77-4E1C-919A-EBB7645C8F10}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Contracts", "src\UserService.Contracts\UserService.Contracts.csproj", "{72379E91-9A4A-4DE0-A81E-E4CD539E2B58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Implementation", "src\UserService.Implementation\UserService.Implementation.csproj", "{7C2E5B04-D9C0-40DE-B129-84B61A6B1F29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +52,13 @@ Global
 		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{981C752E-DE77-4E1C-919A-EBB7645C8F10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72379E91-9A4A-4DE0-A81E-E4CD539E2B58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72379E91-9A4A-4DE0-A81E-E4CD539E2B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72379E91-9A4A-4DE0-A81E-E4CD539E2B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72379E91-9A4A-4DE0-A81E-E4CD539E2B58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C2E5B04-D9C0-40DE-B129-84B61A6B1F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C2E5B04-D9C0-40DE-B129-84B61A6B1F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C2E5B04-D9C0-40DE-B129-84B61A6B1F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C2E5B04-D9C0-40DE-B129-84B61A6B1F29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

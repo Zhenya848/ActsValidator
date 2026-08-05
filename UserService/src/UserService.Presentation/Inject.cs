@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using UserService.Presentation.Authorization;
 using UserService.Presentation.Grpc.Interceptors;
 using UserService.Presentation.Options;
 
@@ -18,6 +20,9 @@ public static class Inject
         services.AddOptions<MessageBrokerOptions>();
         
         services.AddSingleton<IsServiceInterceptor>();
+        
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
         
         services.AddGrpc(options =>
         {

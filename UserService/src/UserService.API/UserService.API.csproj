@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.13" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
           <PrivateAssets>all</PrivateAssets>
@@ -24,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\UserService.Implementation\UserService.Implementation.csproj" />
       <ProjectReference Include="..\UserService.Infrastructure\UserService.Infrastructure.csproj" />
       <ProjectReference Include="..\UserService.Presentation\UserService.Presentation.csproj" />
     </ItemGroup>

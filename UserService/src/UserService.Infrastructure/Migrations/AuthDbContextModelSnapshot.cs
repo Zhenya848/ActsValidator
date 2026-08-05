@@ -206,7 +206,77 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("refresh_sessions", (string)null);
                 });
 
-            modelBuilder.Entity("UserService.Domain.Role", b =>
+            modelBuilder.Entity("UserService.Domain.User.AdminAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_accounts");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_admin_accounts_user_id");
+
+                    b.ToTable("admin_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.ParticipantAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_participant_accounts");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_participant_accounts_user_id");
+
+                    b.ToTable("participant_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("description");
+
+                    b.HasKey("Id")
+                        .HasName("pk_permissions");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_permissions_code");
+
+                    b.ToTable("permissions", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,7 +308,26 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("roles", (string)null);
                 });
 
-            modelBuilder.Entity("UserService.Domain.User", b =>
+            modelBuilder.Entity("UserService.Domain.User.RolePermission", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("permission_id");
+
+                    b.HasKey("RoleId", "PermissionId")
+                        .HasName("pk_role_permissions");
+
+                    b.HasIndex("PermissionId")
+                        .HasDatabaseName("ix_role_permissions_permission_id");
+
+                    b.ToTable("role_permissions", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -311,7 +400,7 @@ namespace UserService.Infrastructure.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("user_name");
 
-                    b.ComplexProperty<Dictionary<string, object>>("UserAccess", "UserService.Domain.User.UserAccess#UserAccess", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("UserAccess", "UserService.Domain.User.User.UserAccess#UserAccess", b1 =>
                         {
                             b1.IsRequired();
 
@@ -339,7 +428,7 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("UserService.Domain.Role", null)
+                    b.HasOne("UserService.Domain.User.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -349,7 +438,7 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("UserService.Domain.User", null)
+                    b.HasOne("UserService.Domain.User.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -359,7 +448,7 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("UserService.Domain.User", null)
+                    b.HasOne("UserService.Domain.User.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -369,14 +458,14 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("UserService.Domain.Role", null)
+                    b.HasOne("UserService.Domain.User.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_roles_roles_role_id");
 
-                    b.HasOne("UserService.Domain.User", null)
+                    b.HasOne("UserService.Domain.User.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -386,7 +475,7 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("UserService.Domain.User", null)
+                    b.HasOne("UserService.Domain.User.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -396,7 +485,7 @@ namespace UserService.Infrastructure.Migrations
 
             modelBuilder.Entity("UserService.Domain.RefreshSession", b =>
                 {
-                    b.HasOne("UserService.Domain.User", "User")
+                    b.HasOne("UserService.Domain.User.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -404,6 +493,63 @@ namespace UserService.Infrastructure.Migrations
                         .HasConstraintName("fk_refresh_sessions_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.AdminAccount", b =>
+                {
+                    b.HasOne("UserService.Domain.User.User", "User")
+                        .WithOne("AdminAccount")
+                        .HasForeignKey("UserService.Domain.User.AdminAccount", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_accounts_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.ParticipantAccount", b =>
+                {
+                    b.HasOne("UserService.Domain.User.User", "User")
+                        .WithOne("ParticipantAccount")
+                        .HasForeignKey("UserService.Domain.User.ParticipantAccount", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_participant_accounts_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.RolePermission", b =>
+                {
+                    b.HasOne("UserService.Domain.User.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_permissions_permission_id");
+
+                    b.HasOne("UserService.Domain.User.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_roles_role_id");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("UserService.Domain.User.User", b =>
+                {
+                    b.Navigation("AdminAccount");
+
+                    b.Navigation("ParticipantAccount");
                 });
 #pragma warning restore 612, 618
         }

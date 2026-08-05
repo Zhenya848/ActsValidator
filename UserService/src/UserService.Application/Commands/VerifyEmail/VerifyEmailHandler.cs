@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 
 namespace UserService.Application.Commands.VerifyEmail;
 

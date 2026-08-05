@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using UserService.Application.Models;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 
 namespace UserService.Application.Abstractions;
 

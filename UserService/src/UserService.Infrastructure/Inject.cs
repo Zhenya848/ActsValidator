@@ -18,11 +18,14 @@ using UserService.Application.Models;
 using UserService.Application.Repositories;
 using UserService.Domain;
 using UserService.Domain.Shared;
+using UserService.Domain.User;
 using UserService.Infrastructure.Authorization;
 using UserService.Infrastructure.Consumers;
 using UserService.Infrastructure.DbContexts;
 using UserService.Infrastructure.EmailSender;
+using UserService.Infrastructure.Options;
 using UserService.Infrastructure.Repositories;
+using UserService.Infrastructure.Seeding;
 using UserService.Presentation.Options;
 
 namespace UserService.Infrastructure;
@@ -35,8 +38,10 @@ public static class Inject
     {
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         
+        services.Configure<AdminOptions>(configuration.GetSection(AdminOptions.ADMIN));
         services.Configure<MailOptions>(configuration.GetSection(MailOptions.SECTION_NAME));
         services.AddOptions<MailOptions>();
+        services.AddOptions<AdminOptions>();
         
         services.AddDbContext<AuthDbContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -54,6 +59,9 @@ public static class Inject
         })
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
+        
+        services.AddSingleton<AccountsSeeder>();
+        services.AddScoped<AccountsSeederService>();
         
         var authOptions = configuration.GetSection(AuthOptions.Auth).Get<AuthOptions>()
                           ?? throw new ApplicationException("Auth options not found");
