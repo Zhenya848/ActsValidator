@@ -8,8 +8,7 @@ namespace ChatService.Models.Chats;
 public class Message : Shared.Entity<MessageId>
 {
     public ChatId ChatId { get; }
-    public int SerialNumber { get; init; }
-    public MessageRole Role { get; }
+    public SenderType Type { get; }
     public string Content { get; private set; }
     public bool IsRedacted { get; private set; }
     public bool IsDeleted { get; private set; }
@@ -23,33 +22,27 @@ public class Message : Shared.Entity<MessageId>
     private Message(
         MessageId id,
         ChatId chatId,
-        int serialNumber,
-        MessageRole role,
+        SenderType type,
         string content,
         DateTime createdAt) : base(id)
     {
         ChatId = chatId;
-        SerialNumber = serialNumber;
-        Role = role;
+        Type = type;
         Content = content;
         CreatedAt = createdAt;
     }
 
     public static Result<Message, ErrorList> Create(
-        ChatId chatId, 
-        int serialNumber, 
-        MessageRole role, 
+        ChatId chatId,
+        SenderType type, 
         string content)
     {
-        if (serialNumber < 1)
-            return (ErrorList)Errors.General.ValueIsInvalid("serial number");
-        
         var validateContentResult = ValidateContent(content);
 
         if (validateContentResult.IsFailure)
             return validateContentResult.Error;
 
-        return new Message(MessageId.AddNewId(), chatId, serialNumber, role, content, DateTime.UtcNow);
+        return new Message(MessageId.AddNewId(), chatId, type, content, DateTime.UtcNow);
     }
     
     public UnitResult<ErrorList> Update(string newContent)

@@ -1,20 +1,11 @@
 syntax = "proto3";
 
-option csharp_namespace = "UserService.Presentation";
+option csharp_namespace = "ChatService";
 
 package greet;
 
 service Greeter {
-  rpc MakeAction (MakeActionRequest) returns (MakeActionResponse);
   rpc GetUsersByPermissions (GetUsersByPermissionsRequest) returns (GetUsersByPermissionsResponse);
-}
-
-message MakeActionRequest {
-  string user_id = 1;
-}
-
-message MakeActionResponse {
-  
 }
 
 message GetUsersByPermissionsRequest {
