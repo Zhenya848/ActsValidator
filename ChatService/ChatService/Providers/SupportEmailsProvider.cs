@@ -1,33 +1,68 @@
 ﻿using ChatService.Abstractions;
+using ChatService.DbContexts;
+using ChatService.Models.Email;
+using ChatService.Models.Shared;
+using ChatService.Models.ValueObjects;
+using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatService.Providers;
 
 public class SupportEmailsProvider
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private List<string> _emails = [];
-    public IReadOnlyList<string> Emails => _emails;
+    private readonly ILogger _logger;
+    private List<SupportEmail> _supportEmails = [];
+    public IReadOnlyList<SupportEmail> Emails => _supportEmails;
 
-    public SupportEmailsProvider(IServiceScopeFactory scopeFactory)
+    public SupportEmailsProvider(IServiceScopeFactory scopeFactory, ILogger<SupportEmailsProvider> logger)
     {
         _scopeFactory = scopeFactory;
+        _logger = logger;
     }
 
-    public async Task<IReadOnlyList<string>> GetSupportEmails(CancellationToken cancellationToken = default)
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (_emails.Count > 0)
-            return _emails;
-
         using var scope = _scopeFactory.CreateScope();
-        var greeterService = scope.ServiceProvider.GetRequiredService<IGreeterService>();
-
-        var result = await greeterService.GetUsersByPermissionsAsync(["chat.all"], cancellationToken);
-
-        _emails = result
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         
-        return result;
+        _supportEmails = await dbContext.SupportEmails
+            .Where(s => s.Status == SupportEmailStatus.Available)
+            .OrderBy(pn => pn.PriorityNumber)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task SetAsDisabled(IEnumerable<string> emails, CancellationToken cancellationToken = default)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        
+        var selectedEmails = _supportEmails.Where(e => emails.Contains(e.Email)).ToArray();
+        
+        var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        foreach (var supportEmail in selectedEmails)
+        {
+            supportEmail.MarkAsDisabled();
+            dbContext.SupportEmails.Update(supportEmail);
+            
+            _supportEmails.Remove(supportEmail);
+        }
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Could not save changes.");
+            
+            foreach (var supportEmail in selectedEmails)
+                supportEmail.MarkAsAvailable();
+            
+            await transaction.RollbackAsync(cancellationToken);
+        }
     }
 }

@@ -9,7 +9,7 @@ public class AppDbContext(IConfiguration configuration) : DbContext
 {
     public DbSet<Chat> Chats => Set<Chat>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-    public DbSet<EmailDelivery> EmailDeliveries => Set<EmailDelivery>();
+    public DbSet<SupportEmail> SupportEmails => Set<SupportEmail>();
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

@@ -1,3 +1,4 @@
+using ChatService.Providers;
 using Quartz;
 
 namespace ChatService.Workers.Outbox;
@@ -6,14 +7,19 @@ namespace ChatService.Workers.Outbox;
 public class ProcessOutboxMessagesJob : IJob
 {
     private readonly ProcessOutboxMessagesService _outboxMessagesService;
+    private readonly SupportEmailsProvider _supportEmailsProvider;
 
-    public ProcessOutboxMessagesJob(ProcessOutboxMessagesService outboxMessagesService)
+    public ProcessOutboxMessagesJob(
+        ProcessOutboxMessagesService outboxMessagesService, 
+        SupportEmailsProvider supportEmailsProvider)
     {
         _outboxMessagesService = outboxMessagesService;
+        _supportEmailsProvider = supportEmailsProvider;
     }
     
     public async Task Execute(IJobExecutionContext context)
     {
+        await _supportEmailsProvider.InitializeAsync(context.CancellationToken);
         await _outboxMessagesService.Execute(context.CancellationToken);
     }
 }

@@ -15,8 +15,10 @@ public static class Inject
         IConfiguration configuration)
     {
         services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.Auth));
+        services.Configure<SupportEmailsOptions>(configuration.GetSection(SupportEmailsOptions.SupportEmails));
         
         services.AddOptions<AuthOptions>();
+        services.AddOptions<SupportEmailsOptions>();
         
         services.AddSingleton<ProvideSecretKeyInterceptor>();
         
