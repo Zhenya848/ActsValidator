@@ -37,6 +37,10 @@ public class JwtTokenProvider : ITokenProvider
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
         
         var jti = Guid.NewGuid();
+
+        var permissionCodes = user.Roles
+            .SelectMany(r => r.RolePermissions)
+            .Select(p => p.Permission.Code);
         
         var claims = new[]
         {
@@ -44,7 +48,8 @@ public class JwtTokenProvider : ITokenProvider
             new Claim(CustomClaims.Jti, jti.ToString()),
             new Claim(CustomClaims.Email, user.Email!),
             new Claim(CustomClaims.Name, user.DisplayName),
-            new Claim(CustomClaims.EmailVerified, user.EmailConfirmed.ToString())
+            new Claim(CustomClaims.EmailVerified, user.EmailConfirmed.ToString()),
+            new Claim(CustomClaims.Permissions, string.Join(PermissionsConstants.SPLIT_SYMBOL, permissionCodes))
         };
 
         var token = new JwtSecurityToken(

@@ -16,4 +16,9 @@
             "абвгдеёжзийклмнопрстуфхцчшщъыьэюя" +
             "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
     }
+    
+    public class PermissionsConstants
+    {
+        public const char SPLIT_SYMBOL = '|';
+    }
 }

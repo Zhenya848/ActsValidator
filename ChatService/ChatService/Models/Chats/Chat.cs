@@ -27,7 +27,7 @@ public class Chat : Shared.Entity<ChatId>
 
         return new Chat(userId, ChatId.AddNewId());
     }
-    
+
     public void AddMessage(Message message) => _messages.Add(message);
     public void RemoveMessage(Message message) => _messages.Remove(message);
 }

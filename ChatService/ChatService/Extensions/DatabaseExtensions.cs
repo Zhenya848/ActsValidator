@@ -1,3 +1,6 @@
+using ChatService.DbContexts;
+using Microsoft.EntityFrameworkCore;
+
 namespace ChatService.Extensions;
 
 public static class DatabaseExtensions
