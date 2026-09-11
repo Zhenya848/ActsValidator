@@ -24,6 +24,15 @@ public static class UserClaimsExtensions
 
         return userId;
     }
+    
+    public static bool HasUserPermission(this ClaimsPrincipal user, string permissionCode)
+    {
+        var userPermissions = user.FindFirst(CustomClaims.Permissions)?.Value
+                .Split(PermissionsConstants.SPLIT_SYMBOL)
+               ?? throw new UnauthorizedAccessException("User permissions not found in claims");
+        
+        return userPermissions.Contains(permissionCode);
+    }
 
     public static string GetUserEmailRequired(this ClaimsPrincipal user)
     {

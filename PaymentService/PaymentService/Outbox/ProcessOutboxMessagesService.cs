@@ -78,18 +78,17 @@ public class ProcessOutboxMessagesService
             var deserializedMessage = JsonSerializer.Deserialize(message.Payload, type)
                 ?? throw new JsonSerializationException($"Unable to deserialize message {message.Payload}");
             
-            await pipeline.ExecuteAsync(async token =>
-            {
-                await _publishEndpoint.Publish(deserializedMessage, type, token);
-
-                message.ProcessedOn = DateTime.UtcNow;
-            }, cancellationToken);
+            await pipeline.ExecuteAsync(async token => 
+                await _publishEndpoint.Publish(deserializedMessage, type, token), 
+                cancellationToken);
+            
+            message.ProcessedOn = DateTime.UtcNow;
         }
         catch (Exception ex)
         {
             message.Error = ex.Message;
             
-            _logger.LogError(ex, "Error processing message {message}", message);
+            _logger.LogError(ex, "Error processing message {message}", ex.Message);
         }
     }
 }

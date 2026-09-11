@@ -28,17 +28,17 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
         builder.Property(e => e.Error).IsRequired(false);
         
         builder.HasIndex(i => new
-        {
-            i.OccurredOn,
-            i.ProcessedOn
-        })
-        .HasDatabaseName("idx_outbox_messages_unprocessed")
-        .IncludeProperties(i => new
-        {
-            i.Id,
-            i.Type,
-            i.Payload
-        })
-        .HasFilter("processed_on IS NULL");
+            {
+                i.OccurredOn,
+                i.ProcessedOn
+            })
+            .HasDatabaseName("idx_outbox_messages_unprocessed")
+            .IncludeProperties(i => new
+            {
+                i.Id,
+                i.Type,
+                i.Payload
+            })
+            .HasFilter("processed_on IS NULL");
     }
 }

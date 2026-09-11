@@ -38,11 +38,12 @@ public class AccountsSeederService(
         
         logger.LogInformation("Seeded role_permissions successfully");
         
+        logger.LogInformation("User email: {email}", adminOptions.Email);
+        
         var adminRole = await roleManager.FindByNameAsync(AdminAccount.ADMIN)
             ?? throw new ApplicationException("Admin Role not found");
-        
-        var adminUser = await userManager.Users
-            .FirstOrDefaultAsync(u => u.Roles.Any(r => r.Name == adminRole.Name));
+
+        var adminUser = await userManager.FindByEmailAsync(adminOptions.Email);
 
         if (adminUser == null)
         {
@@ -53,8 +54,7 @@ public class AccountsSeederService(
         
         logger.LogInformation("Created user admin successfully");
         
-        var adminExist = await accountsDbContext.AdminAccounts
-            .AnyAsync(e => e.User.Email == adminOptions.Email);
+        var adminExist = await accountsDbContext.AdminAccounts.AnyAsync(x => x.UserId == adminUser.Id);
 
         if (adminExist == false)
         {

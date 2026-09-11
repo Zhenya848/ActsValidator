@@ -41,6 +41,11 @@ public class CreatePayment
         if (userId is null)
             return Results.Unauthorized();
         
+        var userEmail = httpContextAccessor.HttpContext?.User.GetUserEmail();
+        
+        if (userEmail is null) 
+            return Errors.User.NotVerified().ToIResultResponse();
+        
         var userEmailVerified = httpContextAccessor.HttpContext?.User.GetUserEmailVerifiedRequired();
 
         if (bool.TryParse(userEmailVerified, out var userEmailVerifiedResult) && userEmailVerifiedResult == false)
@@ -53,7 +58,7 @@ public class CreatePayment
             return Error.NotFound("product.not.found", $"product {request.ProductId} not found").ToIResultResponse();
         
         var paymentSessionResult = PaymentSession
-            .Create(PaymentSessionId.AddNewId(), userId.Value, product.Id, DateTime.UtcNow);
+            .Create(PaymentSessionId.AddNewId(), userId.Value, userEmail, product.Id, DateTime.UtcNow);
         
         if (paymentSessionResult.IsFailure)
             return paymentSessionResult.Error.ToIResultResponse();

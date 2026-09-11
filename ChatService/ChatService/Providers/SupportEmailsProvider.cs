@@ -29,7 +29,6 @@ public class SupportEmailsProvider
         _supportEmails = await dbContext.SupportEmails
             .Where(s => s.Status == SupportEmailStatus.Available)
             .OrderBy(pn => pn.PriorityNumber)
-            .Distinct()
             .ToListAsync(cancellationToken);
     }
 

@@ -29,7 +29,7 @@ public static class UserClaimsExtensions
     {
         var userPermissions = user.FindFirst(CustomClaims.Permissions)?.Value
                 .Split(PermissionsConstants.SPLIT_SYMBOL)
-               ?? throw new UnauthorizedAccessException("User email verified not found in claims");
+               ?? throw new UnauthorizedAccessException("User permissions not found in claims");
         
         return userPermissions.Contains(permissionCode);
     }

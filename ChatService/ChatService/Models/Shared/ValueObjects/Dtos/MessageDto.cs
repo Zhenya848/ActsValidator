@@ -5,13 +5,15 @@ namespace ChatService.Models.Shared.ValueObjects.Dtos;
 
 public record MessageDto
 {
+    public Guid Id { get; init; }
     public Guid ChatId { get; init; }
-    public string SendType { get; init; }
+    public string Type { get; init; }
     public string Content { get; init; }
     public bool IsRedacted { get; init; }
     public DateTime CreatedAt { get; init; }
 
     public static Result<MessageDto, ErrorList> Create(
+        MessageId id,
         ChatId chatId, 
         string sendType,
         string content, 
@@ -32,10 +34,11 @@ public record MessageDto
         if (errors.Count > 0)
             return (ErrorList)errors;
 
-        return new MessageDto()
+        return new MessageDto
         {
+            Id = id,
             ChatId = chatId,
-            SendType = sendType,
+            Type = sendType,
             Content = content,
             IsRedacted = isRedacted,
             CreatedAt = createdAt

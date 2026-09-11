@@ -9,6 +9,8 @@ public class AppDbContext(IConfiguration configuration) : DbContext
     public DbSet<PaymentSession>  PaymentSessions => Set<PaymentSession>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<Receipt> Receipts => Set<Receipt>();
+    public DbSet<TaxTokensSession> TaxTokensSessions => Set<TaxTokensSession>();
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

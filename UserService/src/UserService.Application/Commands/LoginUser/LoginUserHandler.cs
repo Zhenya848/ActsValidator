@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using UserService.Application.Abstractions;
 using UserService.Domain;
 using UserService.Domain.Shared;
@@ -24,7 +25,12 @@ public class LoginUserHandler : ICommandHandler<LoginUserCommand, Result<LoginUs
         LoginUserCommand command, 
         CancellationToken cancellationToken = default)
     {
-        var user = await _userService.FindByEmailAsync(command.Email);
+        var user = await _userService.Users
+            .Where(u => u.Email == command.Email)
+            .Include(r => r.Roles)
+            .ThenInclude(rp => rp.RolePermissions)
+            .ThenInclude(p => p.Permission)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)
             return (ErrorList)Errors.User.WrongCredentials();

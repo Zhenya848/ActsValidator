@@ -1,3 +1,4 @@
+using ChatService.EmailSender;
 using ChatService.Options;
 using Microsoft.Extensions.Options;
 

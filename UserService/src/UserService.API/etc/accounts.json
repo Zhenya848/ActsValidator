@@ -8,18 +8,23 @@
     "Admin" : [
       "user.update",
       "user.send-verification-code",
-      "chats.get"
+      "chat.all",
+      "tax.bootstrap"
     ]
   },
   
   "Permissions" : {
     "Chats" : [
-      "chats.get"
+      "chat.all"
     ],
     
     "Users" : [
       "user.update",
       "user.send-verification-code"
+    ],
+
+    "Payments" : [
+      "tax.bootstrap"
     ]
   }
 }

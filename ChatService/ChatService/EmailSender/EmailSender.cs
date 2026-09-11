@@ -20,37 +20,30 @@ public class EmailSender : IEmailSender
     
     private async Task Send(MailData mailData)
     {
-        try
+        var mail = new MimeMessage();
+
+        mail.From.Add(new MailboxAddress(_mailOptions.FromDisplayName, _mailOptions.From));
+
+        var tryParse = MailboxAddress.TryParse(mailData.To, out var to);
+
+        if (tryParse == false)
+            throw new FormatException("Invalid mail address.");
+
+        mail.To.Add(to);
+
+        var body = new BodyBuilder
         {
-            var mail = new MimeMessage();
+            HtmlBody = mailData.Body
+        };
 
-            mail.From.Add(new MailboxAddress(_mailOptions.FromDisplayName, _mailOptions.From));
+        mail.Body = body.ToMessageBody();
+        mail.Subject = mailData.Subject;
 
-            var tryParse = MailboxAddress.TryParse(mailData.To, out var to);
+        using var client = new SmtpClient();
 
-            if (tryParse == false)
-                throw new FormatException("Invalid mail address.");
-
-            mail.To.Add(to);
-
-            var body = new BodyBuilder
-            {
-                HtmlBody = mailData.Body
-            };
-
-            mail.Body = body.ToMessageBody();
-            mail.Subject = mailData.Subject;
-
-            using var client = new SmtpClient();
-
-            await client.ConnectAsync(_mailOptions.Host, _mailOptions.Port);
-            await client.AuthenticateAsync(_mailOptions.UserName, _mailOptions.Password);
-            await client.SendAsync(mail);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("{message}", ex.Message);
-        }
+        await client.ConnectAsync(_mailOptions.Host, _mailOptions.Port);
+        await client.AuthenticateAsync(_mailOptions.UserName, _mailOptions.Password);
+        await client.SendAsync(mail);
     }
 
     public async Task SendMessageNotificationToSupports(
@@ -62,7 +55,7 @@ public class EmailSender : IEmailSender
             email, 
             "Новое уведомление!", 
             $"Сообщение в поддержку: {messageContent}. Вы можете ответить на него по ссылке: " +
-                $"https://my_site.ru/api/Chats/chat?chatId={chatId}");
+                $"https://express-sverka.ru/supporting?chatId={chatId}");
 
         await Send(mailData);
     }
