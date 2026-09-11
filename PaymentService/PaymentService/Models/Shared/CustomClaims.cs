@@ -7,4 +7,5 @@ public static class CustomClaims
     public const string Name = "NAME";
     public const string Email = "EMAIL";
     public const string EmailVerified = "EMAIL_VERIFIED";
+    public const string Permissions = "PERMISSIONS";
 }

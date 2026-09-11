@@ -1,4 +1,5 @@
 ﻿using ChatService.DbContexts;
+using ChatService.EmailSender;
 using ChatService.Models.Email;
 using ChatService.Options;
 
@@ -24,7 +25,7 @@ public class SupportEmailsSeederService(
                     return;
                 }
 
-                dbContext.SupportEmails.Attach(supportEmailResult.Value);
+                dbContext.SupportEmails.Add(supportEmailResult.Value);
             }
             
             await dbContext.SaveChangesAsync();

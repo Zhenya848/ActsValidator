@@ -1,5 +1,4 @@
-﻿using ChatService.Models.Outbox;
-using ChatService.Models.Shared;
+﻿using ChatService.Models.Shared;
 using ChatService.Models.Shared.ValueObjects.Id;
 using ChatService.Models.ValueObjects;
 using CSharpFunctionalExtensions;

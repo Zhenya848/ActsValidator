@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Commands.ForgotPassword;
 using UserService.Application.Commands.LoginUser;
@@ -68,7 +69,18 @@ public class AuthController : ControllerBase
         if (result.IsFailure)
             return result.Error.ToResponse();
         
-        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        HttpContext.Response.Cookies.Append(
+            "refreshToken",
+            result.Value.RefreshToken.ToString(),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/api/Auth"
+            }
+        );
+        
         var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
         
         return Ok(Envelope.Ok(response));
@@ -111,7 +123,18 @@ public class AuthController : ControllerBase
         if (result.IsFailure)
             return result.Error.ToResponse();
         
-        HttpContext.Response.Cookies.Append("refreshToken", result.Value.RefreshToken.ToString());
+        HttpContext.Response.Cookies.Append(
+            "refreshToken",
+            result.Value.RefreshToken.ToString(),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/api/Auth"
+            }
+        );
+        
         var response = new LoginUserResponse(result.Value.AccessToken, result.Value.User);
         
         return Ok(Envelope.Ok(response));

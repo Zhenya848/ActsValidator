@@ -5,6 +5,7 @@ using PaymentMessaging.Contracts.Messaging;
 using PaymentService.Abstractions;
 using PaymentService.DbContexts;
 using PaymentService.Extensions;
+using PaymentService.Models;
 using PaymentService.Models.Shared;
 using PaymentService.Models.Shared.ValueObjects.Id;
 using PaymentService.Models.ValueObjects;
@@ -66,8 +67,20 @@ public class CatchPurchaseNotification
                 typeof(ProductWasBoughtEvent).AssemblyQualifiedName!,
                 JsonSerializer.Serialize(userBoughtEvent),
                 DateTime.UtcNow);
+
+            var receipt = Receipt.Create(
+                amount, 
+                paymentDataRequest.Amount.Value, 
+                paymentSession.UserEmail,
+                paymentSession.Product.Id,
+                DateTime.UtcNow);
+            
+            if (receipt.IsFailure)
+                return receipt.Error.ToIResultResponse();
             
             dbContext.OutboxMessages.Add(outboxMessage);
+            dbContext.Receipts.Add(receipt.Value);
+            
             paymentSession.Pending();
             
             await unitOfWork.SaveChanges(cancellationToken);

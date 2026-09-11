@@ -1,7 +1,11 @@
 using ChatService;
 using ChatService.Extensions;
+using ChatService.Hubs;
 using ChatService.Middleware;
+using ChatService.Seeding;
 using Microsoft.OpenApi.Models;
+
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,11 +38,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddEndpoints();
 
 builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
+
+var supportEmailsSeeder = app.Services.GetRequiredService<SupportEmailsSeeder>();
+await supportEmailsSeeder.SeedAsync();
 
 await app.ApplyMigrations();
 
@@ -49,6 +68,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(config =>
+{
+    config.WithOrigins("http://localhost:5173")
+        .AllowCredentials()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+});
+
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.MapEndpoints();
 app.UseHttpsRedirection();

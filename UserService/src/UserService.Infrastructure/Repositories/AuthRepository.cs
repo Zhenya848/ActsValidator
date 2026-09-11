@@ -53,6 +53,9 @@ public class AuthRepository : IAuthRepository
     {
         var refreshSession = await _authDbContext.RefreshSessions
             .Include(u => u.User)
+            .ThenInclude(r => r.Roles)
+            .ThenInclude(rp => rp.RolePermissions)
+            .ThenInclude(p => p.Permission)
             .FirstOrDefaultAsync(r => r.RefreshToken == refreshToken, cancellationToken);
 
         if (refreshSession == null)

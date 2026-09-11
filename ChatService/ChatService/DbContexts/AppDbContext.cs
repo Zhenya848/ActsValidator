@@ -1,6 +1,6 @@
-﻿using ChatService.Models.Chats;
+﻿using ChatService.EmailSendingOutbox;
+using ChatService.Models.Chats;
 using ChatService.Models.Email;
-using ChatService.Models.Outbox;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatService.DbContexts;

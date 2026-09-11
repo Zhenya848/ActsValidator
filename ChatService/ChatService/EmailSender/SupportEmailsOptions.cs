@@ -1,4 +1,4 @@
-﻿namespace ChatService.Options;
+﻿namespace ChatService.EmailSender;
 
 public record SupportEmailsOptions
 {

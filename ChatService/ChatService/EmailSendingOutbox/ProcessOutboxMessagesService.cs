@@ -1,8 +1,6 @@
 using ChatService.Abstractions;
 using ChatService.DbContexts;
-using ChatService.Models.Email;
 using ChatService.Models.Event;
-using ChatService.Models.Outbox;
 using ChatService.Providers;
 using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +9,7 @@ using Polly;
 using Polly.Retry;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ChatService.Workers.Outbox;
+namespace ChatService.EmailSendingOutbox;
 
 public class ProcessOutboxMessagesService
 {
@@ -127,12 +125,12 @@ public class ProcessOutboxMessagesService
             {
                 _logger.LogError(
                     ex,
-                    "Failed to send notification to support email {Email}",
-                    email);
+                    "Failed to send notification to support email {Email}: {Error}",
+                    email,
+                    ex.Message);
+
+                outboxMessage.Error = ex.Message;
             }
         }
-        
-        throw new InvalidOperationException(
-            $"Could not send notification for outbox {outboxMessage.Id}");
     }
 }

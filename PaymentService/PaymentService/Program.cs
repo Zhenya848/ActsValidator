@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.OpenApi.Models;
 using PaymentService;
 using PaymentService.Extensions;
 using PaymentService.Middleware;
 using PaymentService.Seeding;
 using Serilog;
+
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,10 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("PaymentService")
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/keys"));
 
 builder.Services.AddEndpoints();
 

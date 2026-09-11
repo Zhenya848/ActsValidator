@@ -1,4 +1,4 @@
-using ChatService.Models.Outbox;
+using ChatService.EmailSendingOutbox;
 using ChatService.Models.Shared.ValueObjects.Id;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

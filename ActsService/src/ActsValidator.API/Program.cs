@@ -6,6 +6,8 @@ using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();

@@ -1,4 +1,5 @@
 using ChatService.Models.Email;
+using ChatService.Models.Shared.ValueObjects.Id;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +9,10 @@ public class SupportEmailConfiguration : IEntityTypeConfiguration<SupportEmail>
 {
     public void Configure(EntityTypeBuilder<SupportEmail> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.ToTable("support_emails");
+        
+        builder.Property(i => i.Id)
+            .HasConversion(i => i.Value, value => SupportEmailId.Create(value));
 
         builder.Property(x => x.Email)
             .HasMaxLength(50)

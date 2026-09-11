@@ -9,7 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="Elastic.Serilog.Sinks" Version="9.0.0" />
+        <PackageReference Include="MailKit" Version="4.17.0" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.14.0-beta.2" />

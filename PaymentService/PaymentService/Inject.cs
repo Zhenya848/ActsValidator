@@ -15,6 +15,11 @@ using PaymentService.DbContexts;
 using PaymentService.Models.Shared;
 using PaymentService.Options;
 using PaymentService.Outbox;
+using PaymentService.Providers;
+using PaymentService.Providers.MyTax;
+using PaymentService.Providers.MyTax.Abstractions;
+using PaymentService.Providers.MyTax.Stores;
+using PaymentService.ReceiptSendingJob;
 using PaymentService.Seeding;
 using Quartz;
 using Serilog;
@@ -30,22 +35,35 @@ public static class Inject
     {
         services.Configure<MessageBrokerOptions>(
             configuration.GetSection(MessageBrokerOptions.MessageBroker));
+        
+        services.Configure<YandexKassaOptions>(
+            configuration.GetSection(YandexKassaOptions.YANDEX));
+        
+        services.Configure<TaxAuthOptions>(
+            configuration.GetSection(TaxAuthOptions.TaxAuth));
 
         services.AddOptions<MessageBrokerOptions>();
+        services.AddOptions<YandexKassaOptions>();
+        services.AddOptions<TaxAuthOptions>();
         
         services.AddHttpContextAccessor();
         
         services.AddScoped<AppDbContext>();
         services.AddScoped<ProcessOutboxMessagesService>();
+        services.AddScoped<ProcessReceiptsSendingService>();
         
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        services.Configure<YandexKassaOptions>(
-            configuration.GetSection(YandexKassaOptions.YANDEX));
-
-        services.AddOptions<YandexKassaOptions>();
         
         services.AddScoped<ProductsSeeder>();
+
+        services.AddScoped<ITaxTokenStore, TaxTokenStore>();
+        services.AddSingleton<TaxTokenCache>();
+        
+        services.AddHttpClient<MoyNalogClient>();
+        services.AddTransient<IMoyNalogClient, MoyNalogClient>();
+        services.AddTransient<IMoyNalogBootstrap, MoyNalogClient>();
+        
+        services.AddScoped<ITaxServiceProvider, MyTaxServiceProvider>();
         
         var authOptions = configuration.GetSection(AuthOptions.Auth).Get<AuthOptions>()
                           ?? throw new ApplicationException("Auth options not found");
@@ -88,11 +106,17 @@ public static class Inject
 
         services.AddQuartz(c =>
         {
-            var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+            var outboxJobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
 
-            c.AddJob<ProcessOutboxMessagesJob>(jobKey)
-                .AddTrigger(t => t.ForJob(jobKey)
+            c.AddJob<ProcessOutboxMessagesJob>(outboxJobKey)
+                .AddTrigger(t => t.ForJob(outboxJobKey)
                     .WithSimpleSchedule(s => s.WithIntervalInSeconds(3).RepeatForever()));
+            
+            var receiptsSendingJobKey = new JobKey(nameof(ProcessReceiptsSendingJob));
+
+            c.AddJob<ProcessReceiptsSendingJob>(receiptsSendingJobKey)
+                .AddTrigger(t => t.ForJob(receiptsSendingJobKey)
+                    .WithSimpleSchedule(s => s.WithIntervalInSeconds(10).RepeatForever()));
         });
         
         string indexFormat =

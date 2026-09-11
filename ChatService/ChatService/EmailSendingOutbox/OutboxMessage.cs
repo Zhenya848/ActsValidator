@@ -1,7 +1,7 @@
 using ChatService.Models.Shared;
 using ChatService.Models.Shared.ValueObjects.Id;
 
-namespace ChatService.Models.Outbox;
+namespace ChatService.EmailSendingOutbox;
 
 public class OutboxMessage : Entity<OutboxMessageId>
 {
