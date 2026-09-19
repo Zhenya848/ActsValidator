@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PaymentService.DbContexts;
@@ -11,9 +12,11 @@ using PaymentService.DbContexts;
 namespace PaymentService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260914194408_init_3")]
+    partial class init_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,14 +110,20 @@ namespace PaymentService.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("occurred_on");
 
-                    b.Property<string>("PrintUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("print_url");
-
                     b.Property<DateTime?>("ProcessedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("processed_on");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("product_name");
+
+                    b.Property<string>("TaxReceiptStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tax_receipt_status");
 
                     b.HasKey("Id")
                         .HasName("pk_receipts");

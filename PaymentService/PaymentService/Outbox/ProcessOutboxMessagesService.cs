@@ -28,8 +28,8 @@ public class ProcessOutboxMessagesService
     public async Task Execute(CancellationToken cancellationToken)
     {
         var messages = await _dbContext.OutboxMessages
-            .OrderBy(o => o.OccurredOn)
             .Where(p => p.ProcessedOn == null)
+            .OrderBy(o => o.OccurredOn)
             .Take(50)
             .ToListAsync(cancellationToken);
         

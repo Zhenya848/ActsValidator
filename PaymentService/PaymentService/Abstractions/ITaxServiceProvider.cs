@@ -8,7 +8,6 @@ public interface ITaxServiceProvider
         decimal amount, 
         string email, 
         string currency, 
-        string productName, 
         DateTime operationTime,
         CancellationToken cancellationToken = default);
 }

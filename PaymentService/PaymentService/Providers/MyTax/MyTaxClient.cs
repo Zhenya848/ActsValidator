@@ -250,6 +250,8 @@ namespace PaymentService.Providers.MyTax
         // т.к. лежит в Singleton-кэше, а не в полях этого класса.
         private async Task EnsureAuthenticatedAsync(CancellationToken cancellationToken)
         {
+            await _tokenCache.EnsureLoadedFromStoreAsync(cancellationToken);
+            
             if (_tokenCache.HasValidAccessToken)
             {
                 ApplyBearerHeader(_tokenCache.AccessToken!);

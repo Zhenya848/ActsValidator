@@ -18,14 +18,12 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
         builder.Property(a => a.Amount).IsRequired();
         builder.Property(c => c.Currency).IsRequired().HasMaxLength(10);
         builder.Property(e => e.CustomerEmail).IsRequired().HasMaxLength(100);
-        builder.Property(p => p.ProductName).IsRequired().HasMaxLength(20);
-        
-        builder.Property(t => t.TaxReceiptStatus).IsRequired().HasConversion<string>();
         
         builder.Property(o => o.OccurredOn).IsRequired();
-        builder.Property(p => p.ProcessedOn).IsRequired();
+        builder.Property(p => p.ProcessedOn).IsRequired(false);
         
         builder.Property(e => e.Error).IsRequired(false).HasMaxLength(100);
+        builder.Property(p => p.PrintUrl).IsRequired(false).HasMaxLength(100);
 
         builder.HasIndex(i => new
             {

@@ -12,6 +12,7 @@ using OpenTelemetry.Resources;
 using PaymentService.Abstractions;
 using PaymentService.Authorization;
 using PaymentService.DbContexts;
+using PaymentService.EmailSender;
 using PaymentService.Models.Shared;
 using PaymentService.Options;
 using PaymentService.Outbox;
@@ -33,6 +34,9 @@ public static class Inject
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.Configure<MailOptions>(
+            configuration.GetSection(MailOptions.SECTION_NAME));
+        
         services.Configure<MessageBrokerOptions>(
             configuration.GetSection(MessageBrokerOptions.MessageBroker));
         
@@ -42,6 +46,7 @@ public static class Inject
         services.Configure<TaxAuthOptions>(
             configuration.GetSection(TaxAuthOptions.TaxAuth));
 
+        services.AddOptions<MailOptions>();
         services.AddOptions<MessageBrokerOptions>();
         services.AddOptions<YandexKassaOptions>();
         services.AddOptions<TaxAuthOptions>();
@@ -53,6 +58,8 @@ public static class Inject
         services.AddScoped<ProcessReceiptsSendingService>();
         
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
+        services.AddScoped<IEmailSender, EmailSender.EmailSender>();
         
         services.AddScoped<ProductsSeeder>();
 
