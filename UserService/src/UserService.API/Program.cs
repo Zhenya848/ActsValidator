@@ -21,9 +21,9 @@ builder.Services.AddControllers();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Listen(IPAddress.Any, 8080);
+    options.Listen(IPAddress.Any, 5172);
     
-    options.Listen(IPAddress.Any, 8081, listenOptions =>
+    options.Listen(IPAddress.Any, 5174, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http2;
     });
@@ -72,6 +72,20 @@ builder.Services
     .AddFromPresentation(builder.Configuration)
     .AddFromApplication();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 var accountsSeeder = app.Services.GetRequiredService<AccountsSeeder>();
@@ -89,13 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
 
-app.UseCors(config =>
-{
-    config.WithOrigins("http://localhost:5173")
-        .AllowCredentials()
-        .AllowAnyHeader()
-        .AllowAnyMethod();
-});
+app.UseCors();
 
 app.UseSerilogRequestLogging();
 

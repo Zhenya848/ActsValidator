@@ -2,6 +2,7 @@ using ActsValidator.Application.Abstractions;
 using ActsValidator.Application.Providers;
 using ActsValidator.Application.Repositories;
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects.Dtos;
 using CSharpFunctionalExtensions;
@@ -87,7 +88,7 @@ public class CreateCollationHandler : ICommandHandler<CreateCollationCommand, Re
     {
         var discrepancies = collation.CollationErrors
             .Select(x => new DiscrepancyDto(
-                x.Act1Row, x.Act2Row, x.Act1Value, x.Act2Value, x.Field, x.Difference, x.Severity))
+                x.Row1, x.Row2, x.Field.ToString(), x.Difference, x.Severity))
             .ToArray();
         
         return new CollationDto(

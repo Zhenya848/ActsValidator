@@ -1,9 +1,10 @@
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using ActsValidator.Domain.Shared;
 using CSharpFunctionalExtensions;
 
 namespace ActsValidator.Application.Repositories;
-using Collation = Domain.Collation;
+using Collation = Collation;
 
 public interface IAppRepository
 {

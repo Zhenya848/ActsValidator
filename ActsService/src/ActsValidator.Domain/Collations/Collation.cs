@@ -1,11 +1,10 @@
-using System.Xml.Schema;
+using ActsValidator.Domain.Collations.ValueObjects;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects;
 using ActsValidator.Domain.Shared.ValueObjects.Ids;
-using ActsValidator.Domain.ValueObjects;
 using CSharpFunctionalExtensions;
 
-namespace ActsValidator.Domain;
+namespace ActsValidator.Domain.Collations;
 
 public class Collation : Shared.Entity<CollationId>
 {

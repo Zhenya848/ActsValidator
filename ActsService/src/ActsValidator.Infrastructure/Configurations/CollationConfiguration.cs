@@ -1,8 +1,8 @@
 using System.Text.Json;
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects.Ids;
-using ActsValidator.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
