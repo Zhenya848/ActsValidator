@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Security.Cryptography;
 using ChatService.Abstractions;
 using ChatService.Authorization;
@@ -8,9 +9,15 @@ using ChatService.Hosts;
 using ChatService.Options;
 using ChatService.Providers;
 using ChatService.Seeding;
+using Elastic.CommonSchema.Serilog;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
+using Serilog;
+using Serilog.Events;
 
 namespace ChatService;
 
@@ -89,6 +96,32 @@ public static class Inject
         });
         
         services.AddQuartzHostedService(o => { o.WaitForJobsToComplete = true; });
+        
+        string indexFormat =
+            $"{Assembly.GetExecutingAssembly().GetName().Name?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM-dd}";
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Debug()
+            .WriteTo.Elasticsearch(
+                [new Uri(configuration.GetConnectionString("Elasticsearch") 
+                         ?? throw new ApplicationException("Elasticsearch connection string not found."))],
+                options =>
+                {
+                    options.IlmPolicy = "app-logs-30d";
+                    options.DataStream = new DataStreamName(indexFormat);
+                    options.TextFormatting = new EcsTextFormatterConfiguration<LogEventEcsDocument>();
+                    options.BootstrapMethod = BootstrapMethod.Silent;
+                })
+            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+            .CreateLogger();
+        
+        services.AddSerilog();
+        
+        services.AddSerilog();
         
         services.AddSignalR();
         

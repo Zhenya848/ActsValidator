@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatService.DbContexts;
 
-public class AppDbContext(IConfiguration configuration) : DbContext
+public class AppDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) : DbContext
 {
     public DbSet<Chat> Chats => Set<Chat>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
@@ -15,7 +15,7 @@ public class AppDbContext(IConfiguration configuration) : DbContext
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));
         optionsBuilder.UseSnakeCaseNamingConvention();
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
+        optionsBuilder.UseLoggerFactory(loggerFactory);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 

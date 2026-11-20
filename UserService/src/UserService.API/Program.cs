@@ -13,7 +13,7 @@ using UserService.Infrastructure.Seeding;
 using UserService.Presentation;
 using UserService.Presentation.Grpc.Services;
 
-DotNetEnv.Env.Load();
+//DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +21,9 @@ builder.Services.AddControllers();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Listen(IPAddress.Any, 5172);
+    options.Listen(IPAddress.Any, 8080);
     
-    options.Listen(IPAddress.Any, 5174, listenOptions =>
+    options.Listen(IPAddress.Any, 8081, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http2;
     });
@@ -78,7 +78,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173"
+                "https://express-sverka.ru"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -103,7 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
 
-app.UseCors();
+app.UseCors("Frontend");
 
 app.UseSerilogRequestLogging();
 

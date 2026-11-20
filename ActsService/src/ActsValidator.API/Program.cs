@@ -46,6 +46,20 @@ builder.Services
     .AddFromPresentation(builder.Configuration)
     .AddFromApplication();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "https://express-sverka.ru"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -56,15 +70,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
+app.UseCors("Frontend");
 
-app.UseCors(config =>
-{
-    config.WithOrigins("http://localhost:5173")
-        .AllowCredentials()
-        .AllowAnyHeader()
-        .AllowAnyMethod();
-});
+app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
 
 app.UseSerilogRequestLogging();
 

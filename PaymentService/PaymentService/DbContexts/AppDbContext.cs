@@ -4,7 +4,7 @@ using PaymentService.Outbox;
 
 namespace PaymentService.DbContexts;
 
-public class AppDbContext(IConfiguration configuration) : DbContext
+public class AppDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) : DbContext
 {
     public DbSet<PaymentSession>  PaymentSessions => Set<PaymentSession>();
     public DbSet<Product> Products => Set<Product>();
@@ -16,7 +16,7 @@ public class AppDbContext(IConfiguration configuration) : DbContext
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));
         optionsBuilder.UseSnakeCaseNamingConvention();
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
+        optionsBuilder.UseLoggerFactory(loggerFactory);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 
