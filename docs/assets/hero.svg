@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10172B"/>
+      <stop offset=".58" stop-color="#1B2450"/>
+      <stop offset="1" stop-color="#4525C7"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#5B35F5"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F5F6FF"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="soft" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="32"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="420" rx="28" fill="url(#bg)"/>
+  <circle cx="1150" cy="70" r="210" fill="#764BFF" opacity=".20" filter="url(#soft)"/>
+  <circle cx="720" cy="420" r="190" fill="#6C5CE7" opacity=".13" filter="url(#soft)"/>
+  <path d="M0 345C202 285 298 390 498 335C682 285 804 211 1015 258C1128 283 1193 319 1280 293V420H0V345Z" fill="#FFFFFF" opacity=".035"/>
+
+  <g transform="translate(72 66)">
+    <rect width="58" height="58" rx="18" fill="url(#accent)"/>
+    <path d="M19 15.5H33.5L41 23V43H19V15.5Z" stroke="white" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M33 15.5V23H40.5M24 29H35.5M24 34.5H35.5M24 40H31" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+
+  <text x="72" y="174" fill="#AFA4FF" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="3.2">DOCUMENT RECONCILIATION</text>
+  <text x="72" y="244" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Экспресс-Сверка</text>
+  <text x="74" y="292" fill="#E7E8FF" font-family="Arial, Helvetica, sans-serif" font-size="23">Акты взаиморасчётов —</text>
+  <text x="74" y="325" fill="#E7E8FF" font-family="Arial, Helvetica, sans-serif" font-size="23">без ручного поиска расхождений</text>
+
+  <g transform="translate(674 70)">
+    <rect x="12" y="14" width="520" height="286" rx="24" fill="#050A1B" opacity=".24" filter="url(#shadow)"/>
+    <rect width="520" height="286" rx="24" fill="url(#card)"/>
+    <circle cx="30" cy="30" r="6" fill="#FF6370"/>
+    <circle cx="51" cy="30" r="6" fill="#FFC247"/>
+    <circle cx="72" cy="30" r="6" fill="#2BCB8B"/>
+    <text x="28" y="72" fill="#8A96B4" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4">ДОКУМЕНТ</text>
+    <text x="206" y="72" fill="#8A96B4" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4">ПОЛЕ</text>
+    <text x="358" y="72" fill="#8A96B4" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="1.4">РЕЗУЛЬТАТ</text>
+    <path d="M28 88H492" stroke="#E7EAF2"/>
+    <text x="28" y="124" fill="#1B2742" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">Акт_1.xlsx</text>
+    <text x="206" y="124" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Дебет / кредит</text>
+    <rect x="358" y="105" width="83" height="26" rx="13" fill="#E6FBF2"/>
+    <text x="399.5" y="122" text-anchor="middle" fill="#079669" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">Совпадение</text>
+    <path d="M28 146H492" stroke="#EDF0F6"/>
+    <text x="28" y="182" fill="#1B2742" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">Акт_2.xlsx</text>
+    <text x="206" y="182" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Дата</text>
+    <rect x="358" y="163" width="107" height="26" rx="13" fill="#FFF4DE"/>
+    <text x="411.5" y="180" text-anchor="middle" fill="#D97706" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">Расхождение</text>
+    <path d="M28 204H492" stroke="#EDF0F6"/>
+    <text x="28" y="240" fill="#1B2742" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">Сводный результат</text>
+    <rect x="28" y="254" width="464" height="8" rx="4" fill="#E9ECF5"/>
+    <rect x="28" y="254" width="374" height="8" rx="4" fill="url(#accent)"/>
+  </g>
+
+  <g transform="translate(1002 330)">
+    <rect width="205" height="52" rx="16" fill="#FFFFFF"/>
+    <circle cx="27" cy="26" r="12" fill="#E7FBF3"/>
+    <path d="M22 26L26 30L33 22" stroke="#079669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="49" y="23" fill="#18233D" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Прозрачный результат</text>
+    <text x="49" y="39" fill="#7A89A6" font-family="Arial, Helvetica, sans-serif" font-size="10">до уровня отдельных строк</text>
+  </g>
+</svg>

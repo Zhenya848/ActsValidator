@@ -1,5 +1,6 @@
 using ActsValidator.Application.Repositories;
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using ActsValidator.Infrastructure.DbContexts;
 using Microsoft.Extensions.Logging;
 

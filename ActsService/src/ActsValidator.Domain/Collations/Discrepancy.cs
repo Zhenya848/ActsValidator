@@ -1,40 +1,39 @@
 using System.Globalization;
-using System.Numerics;
 using System.Text.Json.Serialization;
+using ActsValidator.Domain.Collations.ValueObjects;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects;
 using CSharpFunctionalExtensions;
 
-namespace ActsValidator.Domain.ValueObjects;
+namespace ActsValidator.Domain.Collations;
 
 public record Discrepancy
 {
-    public int? Act1Row { get; init; }
-    public int? Act2Row { get; init; }
-    public string Act1Value { get; init; }
-    public string Act2Value { get; init; }
+    public CollationRow? Row1 { get; init; }
+    public CollationRow? Row2 { get; init; }
+    public DiscrepancyField Field { get; init; }
     public string Difference { get; init; }
-    public string Field { get; init; }
     public string Severity { get; init; }
     
     public virtual bool Equals(Discrepancy? other) =>
-        Act1Row == other?.Act1Row && Act2Row == other?.Act2Row && Act1Value == other?.Act1Value 
-        && Act2Value == other?.Act2Value && Difference == other?.Difference && Field == other?.Field 
-        && Severity == other?.Severity;
+        Row1 == other?.Row1 && Row2 == other?.Row2 && Field == other?.Field
+        && Difference == other?.Difference && Severity == other?.Severity;
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Act1Row, Act2Row, Act1Value, Act2Value, Difference, Field);
+        return HashCode.Combine(Row1, Row2, Field, Difference, Severity);
     }
 
     [JsonConstructor]
-    private Discrepancy(int? act1Row, int? act2Row, string act1Value, string act2Value, 
-        string field, string difference, string severity)
+    private Discrepancy(
+        CollationRow? row1, 
+        CollationRow? row2, 
+        DiscrepancyField field,
+        string difference, 
+        string severity)
     {
-        Act1Row = act1Row;
-        Act2Row = act2Row;
-        Act1Value = act1Value;
-        Act2Value = act2Value;
+        Row1 = row1; 
+        Row2 = row2;
         Field = field;
         Difference = difference;
         Severity = severity;
@@ -48,19 +47,12 @@ public record Discrepancy
                 "Unable to create discrepancies because only 1 or 0 act can be null");
         
         if (act1 is null || act2 is null)
-            return new Discrepancy(
-                act1?.SerialNumber, 
-                act2?.SerialNumber, 
-                act1 is not null ? act1.Debet.ToString(CultureInfo.InvariantCulture) : string.Empty,
-                act2 is not null ? act2.Credit.ToString(CultureInfo.InvariantCulture) : string.Empty,
-                Constants.DiscrepancyFields.Missed, 
-                "none",
-                Constants.DiscrepancySeverity.High);
+            return new Discrepancy(act1, act2, DiscrepancyField.Missing, "none", Constants.DiscrepancySeverity.High);
         
         return GetWithDifference(act1, act2);
     }
 
-    public static Result<Discrepancy, ErrorList> Create(
+    /*public static Result<Discrepancy, ErrorList> Create(
         int? act1Row, 
         int? act2Row, 
         string act1Value,
@@ -87,18 +79,16 @@ public record Discrepancy
             return (ErrorList)errors;
         
         return new Discrepancy(act1Row, act2Row, act1Value, act2Value, field, difference, severity);
-    }
+    }*/
 
     private static Discrepancy GetWithDifference(CollationRow act1, CollationRow act2)
     {
         if (act1.Date.Date != act2.Date.Date)
         {
             return new Discrepancy(
-                act1.SerialNumber, 
-                act2.SerialNumber, 
-                act1.Date.ToString(CultureInfo.InvariantCulture),
-                act2.Date.ToString(CultureInfo.InvariantCulture),
-                Constants.DiscrepancyFields.Date, 
+                act1, 
+                act2, 
+                DiscrepancyField.Date, 
                 GetDateDifference(act1.Date, act2.Date),
                 GetSeverity(act1.Date, act2.Date, (x, y) => (x - y).TotalMinutes));
         }
@@ -107,30 +97,24 @@ public record Discrepancy
                                         && act1.DocumentNumber.Value != act2.DocumentNumber.Value)
         {
             return new Discrepancy(
-                act1.SerialNumber,
-                act2.SerialNumber,
-                act1.DocumentNumber.Value.ToString(CultureInfo.InvariantCulture),
-                act2.DocumentNumber.Value.ToString(CultureInfo.InvariantCulture),
-                Constants.DiscrepancyFields.Document,
+                act1,
+                act2,
+                DiscrepancyField.DocumentNumber,
                 "разные номера документов!",
                 Constants.DiscrepancySeverity.High);
         }
 
         return act1.Debet.Equals(act2.Credit) == false
             ? new Discrepancy(
-                act1.SerialNumber,
-                act2.SerialNumber,
-                act1.Debet.ToString(CultureInfo.InvariantCulture),
-                act2.Credit.ToString(CultureInfo.InvariantCulture),
-                Constants.DiscrepancyFields.Debet,
+                act1,
+                act2,
+                DiscrepancyField.Debet,
                 Math.Abs(act1.Debet - act2.Credit).ToString(CultureInfo.InvariantCulture),
                 GetSeverity(act1.Debet, act2.Credit, (x, y) => (double)(x - y)))
             : new Discrepancy(
-                act1.SerialNumber,
-                act2.SerialNumber,
-                act1.Credit.ToString(CultureInfo.InvariantCulture),
-                act2.Debet.ToString(CultureInfo.InvariantCulture),
-                Constants.DiscrepancyFields.Credit,
+                act1,
+                act2,
+                DiscrepancyField.Credit,
                 Math.Abs(act1.Credit - act2.Debet).ToString(CultureInfo.InvariantCulture),
                 GetSeverity(act1.Credit, act2.Debet, (x, y) => (double)(x - y)));
     }

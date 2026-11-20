@@ -124,6 +124,7 @@ public static class Inject
                          ?? throw new ApplicationException("Elasticsearch connection string not found."))],
                 options =>
                 {
+                    options.IlmPolicy = "app-logs-30d";
                     options.DataStream = new DataStreamName(indexFormat);
                     options.TextFormatting = new EcsTextFormatterConfiguration<LogEventEcsDocument>();
                     options.BootstrapMethod = BootstrapMethod.Silent;
@@ -131,6 +132,7 @@ public static class Inject
             .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
             .CreateLogger();
         
         services.AddSerilog();

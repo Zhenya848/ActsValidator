@@ -6,4 +6,4 @@ scrape_configs:
   - job_name: "actsvalidator-scrape"
     metrics_path: "/metrics"
     static_configs:
-      - targets: ["host.docker.internal:5172", "host.docker.internal:5288", "host.docker.internal:5175"]
+      - targets: ["paymentservice-api:8080", "actsservice-api:8080", "userservice-api:8080"]

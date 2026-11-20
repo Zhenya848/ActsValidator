@@ -1,8 +1,9 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using ActsValidator.Domain.Shared;
 using ActsValidator.Domain.Shared.ValueObjects.Ids;
-using ActsValidator.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,6 +12,12 @@ namespace ActsValidator.Infrastructure.Configurations;
 
 public class CollationConfiguration : IEntityTypeConfiguration<Collation>
 {
+    private readonly JsonSerializerOptions _options = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+    
     public void Configure(EntityTypeBuilder<Collation> builder)
     {
         builder.ToTable("collations");
@@ -34,8 +41,8 @@ public class CollationConfiguration : IEntityTypeConfiguration<Collation>
         );
         
         builder.Property(d => d.CollationErrors).HasConversion(
-                value => JsonSerializer.Serialize(value, JsonSerializerOptions.Default),
-                json => JsonSerializer.Deserialize<HashSet<Discrepancy>>(json, JsonSerializerOptions.Default)!,
+                value => JsonSerializer.Serialize(value, _options),
+                json => JsonSerializer.Deserialize<HashSet<Discrepancy>>(json, _options)!,
                 comparer)
             .HasColumnType("jsonb")
             .IsRequired(false);

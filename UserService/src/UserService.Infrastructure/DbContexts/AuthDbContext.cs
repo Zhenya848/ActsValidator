@@ -8,7 +8,7 @@ using UserService.Domain.User;
 
 namespace UserService.Infrastructure.DbContexts;
 
-public class AuthDbContext(IConfiguration configuration) : IdentityDbContext<User, Role, Guid>
+public class AuthDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) : IdentityDbContext<User, Role, Guid>
 {
     public DbSet<RefreshSession> RefreshSessions => Set<RefreshSession>();
     public DbSet<ProcessedEvent>  ProcessedEvents => Set<ProcessedEvent>();
@@ -22,7 +22,7 @@ public class AuthDbContext(IConfiguration configuration) : IdentityDbContext<Use
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));
         optionsBuilder.UseSnakeCaseNamingConvention();
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
+        optionsBuilder.UseLoggerFactory(loggerFactory);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 
@@ -37,6 +37,12 @@ public class AuthDbContext(IConfiguration configuration) : IdentityDbContext<Use
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
         modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles");
+        
+        modelBuilder.HasPostgresExtension("citext");
+
+        modelBuilder.Entity<User>()
+            .Property(u => u.Email)
+            .HasColumnType("citext");
         
         modelBuilder.Entity<User>()
             .HasMany(u => u.Roles)

@@ -1,7 +1,15 @@
 [
   {
+    "productId": "2_collations",
+    "amount": 2
+  },
+  {
     "productId": "5_collations",
     "amount": 5
+  },
+  {
+    "productId": "15_collations",
+    "amount": 15
   },
   {
     "productId": "subscribe_1_month", 

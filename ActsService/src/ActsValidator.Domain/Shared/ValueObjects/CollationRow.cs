@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
@@ -22,6 +23,7 @@ public record CollationRow : IEquatable<CollationRow>
         return HashCode.Combine(Date, Debet, Credit, DocumentNumber);
     }
 
+    [JsonConstructor]
     private CollationRow(int serialNumber, DateTime date, decimal debet, decimal credit, int? documentNumber)
     {
         SerialNumber = serialNumber;

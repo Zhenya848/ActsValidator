@@ -107,20 +107,14 @@ namespace PaymentService.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("occurred_on");
 
-                    b.Property<DateTime>("ProcessedOn")
+                    b.Property<string>("PrintUrl")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("print_url");
+
+                    b.Property<DateTime?>("ProcessedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("processed_on");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("product_name");
-
-                    b.Property<string>("TaxReceiptStatus")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("tax_receipt_status");
 
                     b.HasKey("Id")
                         .HasName("pk_receipts");

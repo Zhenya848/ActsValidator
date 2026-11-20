@@ -18,14 +18,13 @@ public class MyTaxServiceProvider : ITaxServiceProvider
         decimal amount, 
         string email, 
         string currency, 
-        string productName, 
         DateTime operationTime,
         CancellationToken cancellationToken = default)
     {
         var item = new ReceiptItem()
         {
             Amount = amount,
-            Name = productName,
+            Name = "Доступ к ПО",
             Quantity = 1
         };
  
@@ -37,11 +36,16 @@ public class MyTaxServiceProvider : ITaxServiceProvider
                 "Чек {ReceiptId} успешно отправлен в ФНС на сумму {Total}",
                 result.ReceiptUuid,
                 item.Amount * item.Quantity);
+
+            var url = _moyNalog.GetPrintUrl(result.ReceiptUuid);
+            
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var receiptUri) || receiptUri.Scheme != Uri.UriSchemeHttps)
+                throw new ArgumentException("Некорректный URL чека", nameof(url));
  
             return new SendReceiptResult
             {
                 ReceiptId = result.ReceiptUuid,
-                PrintUrl = _moyNalog.GetPrintUrl(result.ReceiptUuid)
+                PrintUrl = receiptUri
             };
         }
         catch (Exception ex)

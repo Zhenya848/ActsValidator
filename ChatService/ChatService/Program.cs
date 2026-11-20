@@ -5,8 +5,6 @@ using ChatService.Middleware;
 using ChatService.Seeding;
 using Microsoft.OpenApi.Models;
 
-DotNetEnv.Env.Load();
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -43,10 +41,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
-            .AllowCredentials()
+            .WithOrigins(
+                "https://express-sverka.ru"
+            )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -61,6 +61,8 @@ await supportEmailsSeeder.SeedAsync();
 
 await app.ApplyMigrations();
 
+app.UseCors("Frontend");
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -68,14 +70,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors(config =>
-{
-    config.WithOrigins("http://localhost:5173")
-        .AllowCredentials()
-        .AllowAnyHeader()
-        .AllowAnyMethod();
-});
 
 app.MapHub<ChatHub>("/hubs/chat");
 

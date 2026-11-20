@@ -70,9 +70,8 @@ public class CatchPurchaseNotification
 
             var receipt = Receipt.Create(
                 amount, 
-                paymentDataRequest.Amount.Value, 
+                paymentDataRequest.Amount.Currency,
                 paymentSession.UserEmail,
-                paymentSession.Product.Id,
                 DateTime.UtcNow);
             
             if (receipt.IsFailure)
@@ -83,7 +82,7 @@ public class CatchPurchaseNotification
             
             paymentSession.Pending();
             
-            await unitOfWork.SaveChanges(cancellationToken);
+            await unitOfWork.SaveChanges(CancellationToken.None);
             
             return Results.Ok();
         }

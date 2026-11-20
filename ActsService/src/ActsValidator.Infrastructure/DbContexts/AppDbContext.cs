@@ -1,11 +1,12 @@
 using ActsValidator.Domain;
+using ActsValidator.Domain.Collations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace ActsValidator.Infrastructure.DbContexts;
 
-public class AppDbContext(IConfiguration configuration) : DbContext
+public class AppDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) : DbContext
 {
     public DbSet<Collation> Collations => Set<Collation>();
     
@@ -13,7 +14,7 @@ public class AppDbContext(IConfiguration configuration) : DbContext
     {
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("Database"));
         optionsBuilder.UseSnakeCaseNamingConvention();
-        optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
+        optionsBuilder.UseLoggerFactory(loggerFactory);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 
